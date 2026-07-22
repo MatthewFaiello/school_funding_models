@@ -1,5 +1,5 @@
 RunStatus,FileType,RelativePath,FileSizeBytes,RowCount,MD5
-Completed,Generated output,data/output/00_run_settings.csv,798,16,e981d71bff7d7397f36a148cd1f3e7f9
+Completed,Generated output,data/output/00_run_settings.csv,798,16,be505c8841e223fb68a9f56d870da241
 Completed,Generated output,data/output/02_shared_input_qc_detail.csv,80588,1058,5f68cdb6fab533d383dbe85d0c802f34
 Completed,Generated output,data/output/02_shared_input_qc_summary.csv,338,9,8867eb2882e1b1da04daac37f3d6a655
 Completed,Generated output,data/output/02_shared_model_input.csv,58222,283,06993cbe85ce617e43ae208935dede23
@@ -48,6 +48,7 @@ Completed,Generated output,data/output/10_lea_type_summary.csv,850,2,e3cdb9cd8f0
 Completed,Generated output,data/output/10_report_ready_text.csv,1463,4,e89108b36ad38b2205f9e4ca333dddc7
 Completed,Generated output,data/output/10_report_summary.csv,1847,1,340e19822e2943745c9d7d9da7c6f2fc
 Completed,Generated output,data/output/10_reporting_qc.csv,576,12,28b46e5f2489fd2e44c759daabd856b3
+Completed,Maintained input,data/input/Copy of Calculator for 25-26 w Charter (003).xlsm,190145,,9d2195854b6445fe2fe6f4d32e29ae11
 Completed,Maintained input,data/input/current_lea_supplement.csv,1749,44,181e1147314c3f0c07223f37a176f28f
 Completed,Maintained input,data/input/current_rate_map.csv,3234,32,44dfef3f4691b5a7d4db86d2d21fed5a
 Completed,Maintained input,data/input/current_school_supplement.csv,17741,232,aba0e1569c128ae42942c16d2b1b5218
