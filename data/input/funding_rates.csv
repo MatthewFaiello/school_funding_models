@@ -1,0 +1,29 @@
+﻿Component,Funding Section,Funding Rate,Rate Basis,Source Cell
+Division I Teacher - K-3 Regular Education,Base Funding (State Support),96155,Per position,Calculator!E6
+Division I Teacher - 4-12 Regular Education,Base Funding (State Support),96155,Per position,Calculator!E7
+Division I Teacher - Basic Special Education,Base Funding (State Support),96155,Per position,Calculator!E8
+Division I Teacher - Intensive Special Education,Base Funding (State Support),96155,Per position,Calculator!E9
+Division I Teacher - Complex Special Education,Base Funding (State Support),96155,Per position,Calculator!E10
+Vocational Division I / Vocational Deduct,Base Funding (State Support),96155,Per position,Calculator!E11; Calculator!E12
+Principal,Base Funding (State Support),153065,Per position,Calculator!E13
+Assistant Principal,Base Funding (State Support),134266,Per position,Calculator!E14
+Administrative Support Professionals,Base Funding (State Support),74017,Per position,Calculator!E15
+Instructional Supports,Base Funding (State Support),96155,Per position,Calculator!E16
+Opportunity Funding - Low Income,Opportunity Funding (State Support),4953.004947079573,Per weighted student,Calculator!E20
+Opportunity Funding - Multilingual Learner,Opportunity Funding (State Support),4953.004947079573,Per weighted student,Calculator!E21
+Operational Funding - Enrollment,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E25
+Operational Funding - Low Income,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E26
+Operational Funding - Multilingual Learner,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E27
+Operational Funding - Basic Special Education,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E28
+Operational Funding - Intensive Special Education,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E29
+Operational Funding - Complex Special Education,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E30
+Operational Funding - Vocational,Operational Funding (State Support),3244.992535780311,Per weighted student,Calculator!E31
+Superintendent,Central Office Funding (State Support),188319,Per position,Calculator!E35
+Administrative Assistant,Central Office Funding (State Support),111365,Per position,Calculator!E36
+Assistant Superintendent,Central Office Funding (State Support),167858,Per position,Calculator!E37
+Director,Central Office Funding (State Support),166369,Per position,Calculator!E38
+11-Month Supervisor,Central Office Funding (State Support),113281.67,Per position,Calculator!E39
+Buildings and Grounds Supervisor,Central Office Funding (State Support),123580,Per position,Calculator!E40
+Food Services Supervisor,Central Office Funding (State Support),123580,Per position,Calculator!E41
+Transportation Supervisor,Central Office Funding (State Support),123580,Per position,Calculator!E42
+Reading Cadre,Central Office Funding (State Support),96155,Per position,Calculator!E43

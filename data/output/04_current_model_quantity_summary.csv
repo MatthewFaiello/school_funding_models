@@ -1,0 +1,33 @@
+SummaryScope,CalculationLevel,QuantityType,Component,FundingQuantity,RowsMissingInput,RowsProvisional,InputComplete,CalculationComplete
+Includes DAFB,LEA,Position,11-Month Supervisor,78.61,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Administrative Assistant,44,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Assistant Superintendent,19,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Buildings and Grounds Supervisor,0,44,0,FALSE,FALSE
+Includes DAFB,LEA,Position,Director,60,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Food Services Supervisor,9,11,0,FALSE,FALSE
+Includes DAFB,LEA,Position,Reading Cadre,20,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Related Services Specialist - Basic,26.82,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Related Services Specialist - Complex,818.07,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Related Services Specialist - Intensive,210.09,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Superintendent,20,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Transportation Supervisor,18.84,0,0,TRUE,TRUE
+Includes DAFB,LEA,Position,Visiting Teacher,47.16,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Academic Excellence,565.22,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Assistant Principal,361.75,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Cafeteria Manager,17.52,24,24,FALSE,TRUE
+Includes DAFB,School,Position,Cafeteria Worker,118.1,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Counselor / Social Worker,373.1,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Custodians,0,232,0,FALSE,FALSE
+Includes DAFB,School,Position,Division I Teacher - 4-12 Regular Education,4000.65,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Division I Teacher - Basic Special Education,1528.86,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Division I Teacher - Complex Special Education,2454.12,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Division I Teacher - Intensive Special Education,1155.47,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Division I Teacher - K-3 Regular Education,2100.75,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Division I Teacher - Pre-K,131.31,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Driver Education Teacher,91.7,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Nurse,207.4,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Principal,224,0,0,TRUE,TRUE
+Includes DAFB,School,Position,School Psychologist,133.25,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Secretary,1054,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Vocational Deduct,-419.8,0,0,TRUE,TRUE
+Includes DAFB,School,Position,Vocational Division I,839.2,0,0,TRUE,TRUE

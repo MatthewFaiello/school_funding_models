@@ -1,0 +1,14 @@
+Check,Value,Status
+Matched school/program records,237,Info
+Unmatched school/program records,0,Pass
+Incomplete school/program comparisons,232,Info
+Matched LEAs,44,Info
+Unmatched LEAs,0,Pass
+Incomplete LEA comparisons,44,Info
+Statewide records,1,Pass
+Statewide comparison complete,FALSE,Info
+Official percent fields populated on incomplete rows,0,Pass
+Current LEA-to-state funding difference,0,Pass
+Proposed LEA-to-state funding difference,0,Pass
+Operational enrollment basis,total,Info
+Weighted rate method,recalculated,Info

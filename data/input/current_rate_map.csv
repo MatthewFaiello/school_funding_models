@@ -1,0 +1,33 @@
+Component,RateComponent,RateCategory,RateNote
+Division I Teacher - Pre-K,Division I Teacher - K-3 Regular Education,Shared,Uses the shared Division I teacher rate.
+Division I Teacher - K-3 Regular Education,Division I Teacher - K-3 Regular Education,Direct,Exact component match.
+Division I Teacher - 4-12 Regular Education,Division I Teacher - 4-12 Regular Education,Direct,Exact component match.
+Division I Teacher - Basic Special Education,Division I Teacher - Basic Special Education,Direct,Exact component match.
+Division I Teacher - Intensive Special Education,Division I Teacher - Intensive Special Education,Direct,Exact component match.
+Division I Teacher - Complex Special Education,Division I Teacher - Complex Special Education,Direct,Exact component match.
+Vocational Division I,Vocational Division I / Vocational Deduct,Shared,Uses the shared vocational position rate.
+Vocational Deduct,Vocational Division I / Vocational Deduct,Shared,Uses the shared vocational position rate.
+Principal,Principal,Direct,Exact component match.
+Assistant Principal,Assistant Principal,Direct,Exact component match.
+Counselor / Social Worker,Instructional Supports,Assumption,Assumed to use the Instructional Supports rate.
+School Psychologist,Instructional Supports,Assumption,Assumed to use the Instructional Supports rate.
+Nurse,Instructional Supports,Documented mapping,The proposed model combines nursing into Instructional Supports.
+Academic Excellence,Instructional Supports,Documented mapping,The proposed model combines Academic Excellence into Instructional Supports.
+Secretary,Administrative Support Professionals,Assumption,Assumed to use the Administrative Support Professionals rate.
+Driver Education Teacher,Instructional Supports,Documented mapping,The proposed model combines Driver Education into Instructional Supports.
+Custodians,,Missing,No shared funding rate was supplied.
+Cafeteria Manager,,Missing,No shared funding rate was supplied.
+Cafeteria Worker,,Missing,No shared funding rate was supplied.
+Superintendent,Superintendent,Direct,Exact component match.
+Assistant Superintendent,Assistant Superintendent,Direct,Exact component match.
+Director,Director,Direct,Exact component match.
+Administrative Assistant,Administrative Assistant,Direct,Exact component match.
+11-Month Supervisor,11-Month Supervisor,Direct,Exact component match.
+Related Services Specialist - Basic,Instructional Supports,Documented mapping,The proposed model combines Related Services into Instructional Supports.
+Related Services Specialist - Intensive,Instructional Supports,Documented mapping,The proposed model combines Related Services into Instructional Supports.
+Related Services Specialist - Complex,Instructional Supports,Documented mapping,The proposed model combines Related Services into Instructional Supports.
+Visiting Teacher,Instructional Supports,Assumption,Assumed to use the Instructional Supports rate.
+Buildings and Grounds Supervisor,Buildings and Grounds Supervisor,Direct,Exact component match.
+Food Services Supervisor,Food Services Supervisor,Direct,Exact component match.
+Transportation Supervisor,Transportation Supervisor,Direct,Exact component match.
+Reading Cadre,Reading Cadre,Direct,Exact component match.

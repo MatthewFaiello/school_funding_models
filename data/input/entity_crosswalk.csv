@@ -1,0 +1,4 @@
+CrosswalkType,DistrictCode,SchoolCode,SharedSchoolName,ExternalSchoolName,Notes
+Student counts to shared input,24,696,Clayton Middle School,Clayton Intermediate School,Student-count export and unit-count workbook use different names for the same school code.
+Proposed calculator entity,24,696,Clayton Middle School,Clayton Intermediate School,Shared input and proposed calculator use different school names.
+Proposed calculator entity,40,770,Sussex Technical High School,Sussex Tech High School,Shared input and proposed calculator use different school names.

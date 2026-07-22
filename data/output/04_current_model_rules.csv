@@ -1,0 +1,33 @@
+CalculationLevel,Component,QuantityType,SourceField,Rule
+School,Division I Teacher - Pre-K,Position,UnitsPreK,Use reported Basic Pre-K special education positions.
+School,Division I Teacher - K-3 Regular Education,Position,UnitsK3,Use reported positions.
+School,Division I Teacher - 4-12 Regular Education,Position,Units4_12,Use reported positions.
+School,Division I Teacher - Basic Special Education,Position,UnitsBasicK12,Use reported positions.
+School,Division I Teacher - Intensive Special Education,Position,UnitsIntense,Use reported positions.
+School,Division I Teacher - Complex Special Education,Position,UnitsComplex,Use reported positions.
+School,Vocational Division I,Position,UnitsVocational,Use reported vocational Division I positions.
+School,Vocational Deduct,Position,UnitsVocationalDeduct,Use the reported negative vocational deduction.
+School,Principal,Position,UnitsTotal,One principal when total Division I units are at least 15.
+School,Assistant Principal,Position,UnitsTotal,"Apply the 25, 30, 50, 55, and additional 20-unit thresholds."
+School,Counselor / Social Worker,Position,K8Enrollment,K-8 enrollment divided by 250.
+School,School Psychologist,Position,K8Enrollment,K-8 enrollment divided by 700.
+School,Nurse,Position,UnitsTotal,One per 40 units; the fractional portion is funded at 30 percent.
+School,Academic Excellence,Position,Enrollment,Enrollment divided by 250.
+School,Secretary,Position,UnitsTotal,One per 10 units through 100; one per completed 12 thereafter.
+School,Driver Education Teacher,Position,Grade10Enrollment,Grade 10 enrollment divided by 125.
+School,Custodians,Position,CustodianPositions,Use site-evaluated custodian positions.
+School,Cafeteria Manager,Position,SatelliteCafeteriaCount,Charters earn 0.73 plus 0.73 per satellite.
+School,Cafeteria Worker,Position,Enrollment,Charters earn 0.0062 positions per student.
+LEA,Superintendent,Position,LEAType,One per district; DAFB is treated as a district; charters are ineligible.
+LEA,Assistant Superintendent,Position,UnitsTotal,"One per completed 300 Division I units, capped at two, for districts and DAFB."
+LEA,Director,Position,UnitsTotal,"One at 200 units plus one per completed additional 100, capped at six."
+LEA,Administrative Assistant,Position,LEA,One per LEA.
+LEA,11-Month Supervisor,Position,UnitsTotal,Division I units divided by 150.
+LEA,Related Services Specialist - Basic,Position,UnitsBasicK12,Basic units divided by 57.
+LEA,Related Services Specialist - Intensive,Position,UnitsIntense,Intensive units divided by 5.5.
+LEA,Related Services Specialist - Complex,Position,UnitsComplex,Complex units divided by 3.
+LEA,Visiting Teacher,Position,UnitsTotal,Division I units divided by 250.
+LEA,Buildings and Grounds Supervisor,Position,CustodialUnits,One when custodial units are at least 95.
+LEA,Food Services Supervisor,Position,SchoolLunchBuildingCount,Districts and DAFB earn one at 500 units or with at least four lunch buildings.
+LEA,Transportation Supervisor,Position,Enrollment,"Enrollment divided by 7,500; fractional positions are allowed."
+LEA,Reading Cadre,Position,LEAType,One per district; DAFB is treated as a district; charters are ineligible.

@@ -1,0 +1,71 @@
+RunStatus,FileType,RelativePath,FileSizeBytes,RowCount,MD5
+Completed,Generated output,data/output/00_run_settings.csv,798,16,e981d71bff7d7397f36a148cd1f3e7f9
+Completed,Generated output,data/output/02_shared_input_qc_detail.csv,80588,1058,5f68cdb6fab533d383dbe85d0c802f34
+Completed,Generated output,data/output/02_shared_input_qc_summary.csv,338,9,8867eb2882e1b1da04daac37f3d6a655
+Completed,Generated output,data/output/02_shared_model_input.csv,58222,283,06993cbe85ce617e43ae208935dede23
+Completed,Generated output,data/output/03_current_input_qc.csv,1185,10,8a10d568fcb7674c0f5c2922645971aa
+Completed,Generated output,data/output/03_current_lea_input.csv,10093,44,c75d465d06a45eac11482f3552add02c
+Completed,Generated output,data/output/03_current_school_input.csv,54693,237,4c07f327d5edb55666fa98556b0b1215
+Completed,Generated output,data/output/04_current_model_issues.csv,1828,9,ae3013f6d31553ab3943a9da1dce0586
+Completed,Generated output,data/output/04_current_model_quantities.csv,1271071,5075,6afd2558e11d13948a3089b991a8b5dd
+Completed,Generated output,data/output/04_current_model_quantity_summary.csv,2497,32,f82e2026f6d4a280db37a001571c3e17
+Completed,Generated output,data/output/04_current_model_rules.csv,3172,32,58bca143672fcdb33b251945b48c8911
+Completed,Generated output,data/output/05_current_model_funding_detail.csv,2113247,5075,62e25e556130d3ac63751f0c7e77482f
+Completed,Generated output,data/output/05_current_model_lea_summary.csv,8288,44,cf2e790c8b9e49634d06cbb87c3a6856
+Completed,Generated output,data/output/05_current_model_rate_issues.csv,305,2,81407921673cea5b88eb936d19ddeae9
+Completed,Generated output,data/output/05_current_model_school_summary.csv,49344,237,a7a22a25f304470c5170cda1128334f3
+Completed,Generated output,data/output/05_current_model_state_summary.csv,5041,32,673473cffd981053da81aa06d99ed0df
+Completed,Generated output,data/output/06_proposed_charter_buildings.csv,6118,48,cc3f63559f045a9f59d72770d6b90c17
+Completed,Generated output,data/output/06_proposed_charter_reconciliation.csv,86372,336,22898653068cd0ce191e7afba4a2333a
+Completed,Generated output,data/output/06_proposed_input_qc.csv,697,13,9393737b684605fac822b4c26636679a
+Completed,Generated output,data/output/06_proposed_lea_input.csv,19787,44,37c95cbf9ceab064d7c773f0c7e7f05d
+Completed,Generated output,data/output/06_proposed_school_calculation_units.csv,113737,261,8e6c025f86365c57ea394687d7065b75
+Completed,Generated output,data/output/06_proposed_weighted_input.csv,85107,237,b4078af214902f4911f6b28ea776a4a7
+Completed,Generated output,data/output/07_proposed_model_issues.csv,2010,8,6179c66f37e8d53b76759cdc543adff3
+Completed,Generated output,data/output/07_proposed_model_quantities.csv,3338400,5400,e112e9dd131f4352ba3d9aa9da713541
+Completed,Generated output,data/output/07_proposed_model_quantity_summary.csv,8791,29,07a56372581444f8fb9cbe245f0ba283
+Completed,Generated output,data/output/07_proposed_model_rules.csv,5162,29,3810e0ddfb927513a289c2ff62dc4fcc
+Completed,Generated output,data/output/08_proposed_model_funding_detail.csv,3923045,5400,2c02541765be4aa95546230a26c6b697
+Completed,Generated output,data/output/08_proposed_model_lea_summary.csv,15804,44,5baaa6909d0a4f3397c17baeb7413322
+Completed,Generated output,data/output/08_proposed_model_rate_issues.csv,75,0,f6344a712546bfa2f5ccf939f500633a
+Completed,Generated output,data/output/08_proposed_model_school_summary.csv,88331,237,e315773c9c6c125c52bcd5976b7e2fe3
+Completed,Generated output,data/output/08_proposed_model_state_summary.csv,10186,29,f95ca42f3bc8b9020049d498cbe9b00e
+Completed,Generated output,data/output/08_proposed_weighted_component_summary.csv,3096,9,3ed9a538a188ebbdb99d018239382ae9
+Completed,Generated output,data/output/08_proposed_weighted_rate_summary.csv,799,2,a00b422f91ad75b3c7e5aab3c9f24074
+Completed,Generated output,data/output/09_comparison_qc.csv,524,13,5059855b92875a491463f15c893d6cf6
+Completed,Generated output,data/output/09_lea_comparison.csv,33777,44,5bf20dc97d11d296268720af23845665
+Completed,Generated output,data/output/09_school_comparison.csv,173560,237,67cd08548d707d18f4781d1cc1a88cc1
+Completed,Generated output,data/output/09_state_comparison.csv,1907,1,4e1e8c01ab6c552498d6fb4102be5016
+Completed,Generated output,data/output/10_adjusted_lea_comparison.csv,47915,42,e90bc4a4dd9541571f5ec01cae6e64b1
+Completed,Generated output,data/output/10_adjusted_school_comparison.csv,245905,233,476dc2e7de2530a4828fb12c023f9e0a
+Completed,Generated output,data/output/10_adjusted_state_summary.csv,2092,1,e78d3730e1fb9769014a94faebe5049e
+Completed,Generated output,data/output/10_adjusted_weighted_component_summary.csv,2062,9,b2993447e74e06622c0bc01cf785fbfa
+Completed,Generated output,data/output/10_adjusted_weighted_rate_summary.csv,896,2,1d1cbf2f59ebce32c6fef0ecb922b841
+Completed,Generated output,data/output/10_exclusion_audit.csv,2007,10,81ea04f64143b5fad272d866d89956e4
+Completed,Generated output,data/output/10_lea_distribution_summary.csv,728,2,f7a88031bcaf3f133ab1f9dbd4657cca
+Completed,Generated output,data/output/10_lea_rankings.csv,5707,30,e07fb0657a02340837f3d7a9bfc19a17
+Completed,Generated output,data/output/10_lea_type_summary.csv,850,2,e3cdb9cd8f0400e6017b6070e73387f3
+Completed,Generated output,data/output/10_report_ready_text.csv,1463,4,e89108b36ad38b2205f9e4ca333dddc7
+Completed,Generated output,data/output/10_report_summary.csv,1847,1,340e19822e2943745c9d7d9da7c6f2fc
+Completed,Generated output,data/output/10_reporting_qc.csv,576,12,28b46e5f2489fd2e44c759daabd856b3
+Completed,Maintained input,data/input/current_lea_supplement.csv,1749,44,181e1147314c3f0c07223f37a176f28f
+Completed,Maintained input,data/input/current_rate_map.csv,3234,32,44dfef3f4691b5a7d4db86d2d21fed5a
+Completed,Maintained input,data/input/current_school_supplement.csv,17741,232,aba0e1569c128ae42942c16d2b1b5218
+Completed,Maintained input,data/input/entity_crosswalk.csv,564,3,d0361b3db74401345100a47dbeee1cd7
+Completed,Maintained input,data/input/funding_rates.csv,3130,28,e39ff8dfe887e786d16b3b342543e843
+Completed,Maintained input,data/input/lea_crosswalk.csv,3076,44,b7a3542941b760b870a6883567e6eec7
+Completed,Maintained input,data/input/proposed_calculator.xlsm,180092,,673903c2a37967724ac37351a0d2520a
+Completed,Maintained input,data/input/student_counts.csv,24677,232,61d1aac2dcc1e8115e6703e8247eddd0
+Completed,Maintained input,data/input/unit_count.xlsx,54187,,4605218a5cc018c601ba5a3b8a54884b
+Completed,Script,scripts/00_run_all.R,4657,,36f32d83785eeee6e087dc4b096bcd5b
+Completed,Script,scripts/00_settings.R,6176,,66d1eb2229e8bcfc2f3cc4af240e5dc4
+Completed,Script,scripts/01_student_counts.sql,3970,,1d03e50904bf3b88c98ef282156e885d
+Completed,Script,scripts/02_build_shared_input.R,18248,,49cfa088883731309d9e6686e5fab632
+Completed,Script,scripts/03_prepare_current_inputs.R,11933,,cffb4a0f98908d0bf0cace9498f4a5f2
+Completed,Script,scripts/04_calculate_current_quantities.R,23380,,9736f2721e749437ebfa442fc1fb5bca
+Completed,Script,scripts/05_apply_current_rates.R,8532,,188b09c89998e4d35ffbc5d70bfbed66
+Completed,Script,scripts/06_prepare_proposed_inputs.R,31168,,74aed5ccadde5232d027247f91d8dd0d
+Completed,Script,scripts/07_calculate_proposed_quantities.R,29385,,a5d79d663cbd7600529aa132bac33f6f
+Completed,Script,scripts/08_apply_proposed_rates.R,12308,,b76e6bebe7b3705526e96379938e7e3f
+Completed,Script,scripts/09_compare_models.R,19709,,8d7df18bbab65ef720119c566c5f69ec
+Completed,Script,scripts/10_reporting_analysis.R,34798,,72c1ca31effd62dd0500b71234fb83bf

@@ -1,0 +1,33 @@
+StatewideScope,FundingSection,Component,RateCategory,CalculatedPositions,ConfirmedFundingAmount,MappedFundingAmount,AssumptionFundingAmount,TotalModeledFundingAmount,RowsMissingInput,RowsMissingRate,InputComplete,ProvisionalQuantityRows,QuantityCalculationComplete,FundingRateComplete,OverallComplete
+Excludes DAFB,Base Funding (State Support),Academic Excellence,Documented mapping,563.316,0,54165649.98000002,0,54165649.98000002,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Assistant Principal,Direct,361.7499999999998,48570725.49999996,0,0,48570725.49999996,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Counselor / Social Worker,Assumption,371.4399999999997,0,0,35715813.2,35715813.2,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - 4-12 Regular Education,Direct,3989.6999999999994,383629603.5,0,0,383629603.5,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - Basic Special Education,Direct,1522.5500000000002,146400795.24999997,0,0,146400795.24999997,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - Complex Special Education,Direct,2449.1200000000017,235495133.6,0,0,235495133.6,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - Intensive Special Education,Direct,1152.4700000000003,110815752.85000002,0,0,110815752.85000002,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - K-3 Regular Education,Direct,2090.009999999999,200964911.55000007,0,0,200964911.55000007,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Division I Teacher - Pre-K,Shared,131.31,12626113.05,0,0,12626113.05,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Driver Education Teacher,Documented mapping,91.59200000000001,0,8807028.760000004,0,8807028.760000004,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Nurse,Documented mapping,207.12409999999997,0,19916017.835499983,0,19916017.835499983,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Principal,Direct,223,34133495,0,0,34133495,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Related Services Specialist - Basic,Documented mapping,26.712105263157895,0,2568502.481578948,0,2568502.481578948,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Related Services Specialist - Complex,Documented mapping,816.4066666666663,0,78501583.03333332,0,78501583.03333332,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Related Services Specialist - Intensive,Documented mapping,209.54,0,20148318.700000003,0,20148318.700000003,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),School Psychologist,Assumption,132.65714285714284,0,0,12755647.571428578,12755647.571428578,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Secretary,Assumption,1053,0,0,77939901,77939901,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Visiting Teacher,Assumption,47.018640000000005,0,0,4521077.3292,4521077.3292,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Vocational Deduct,Shared,-419.6100000000001,-40347599.55000002,0,0,-40347599.55000002,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Base Funding (State Support),Vocational Division I,Shared,838.8300000000003,80657698.64999999,0,0,80657698.64999999,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),11-Month Supervisor,Direct,78.36439999999999,8877250.100548,0,0,8877250.100548,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Administrative Assistant,Direct,43,4788695,0,0,4788695,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Assistant Superintendent,Direct,19,3189302,0,0,3189302,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Buildings and Grounds Supervisor,Direct,0,0,0,0,0,43,0,FALSE,0,FALSE,TRUE,FALSE
+Excludes DAFB,Central Office Funding (State Support),Director,Direct,60,9982140,0,0,9982140,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Food Services Supervisor,Direct,9,1112220,0,0,1112220,10,0,FALSE,0,FALSE,TRUE,FALSE
+Excludes DAFB,Central Office Funding (State Support),Reading Cadre,Direct,19,1826945,0,0,1826945,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Superintendent,Direct,19,3578061,0,0,3578061,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Central Office Funding (State Support),Transportation Supervisor,Direct,18.777199999999993,2320486.3759999997,0,0,2320486.3759999997,0,0,TRUE,0,TRUE,TRUE,TRUE
+Excludes DAFB,Rate missing,Cafeteria Manager,Missing,17.520000000000007,0,0,0,0,24,24,FALSE,24,TRUE,FALSE,FALSE
+Excludes DAFB,Rate missing,Cafeteria Worker,Missing,118.10379999999999,0,0,0,0,0,24,TRUE,0,TRUE,FALSE,FALSE
+Excludes DAFB,Rate missing,Custodians,Missing,0,0,0,0,0,229,0,FALSE,0,FALSE,TRUE,FALSE
