@@ -20,10 +20,6 @@ transparent_funding_pipeline/
 ├── school_funding_model.Rproj
 ├── RUN_PIPELINE.R
 ├── README.md
-├── AUDIT_CHECKLIST.md
-├── PIPELINE_MAP.csv
-├── FILE_MANIFEST.csv
-├── VALIDATION.md
 ├── scripts/
 │   ├── 00_settings.R
 │   ├── 00_run_all.R
