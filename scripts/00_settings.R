@@ -51,6 +51,20 @@ operational_enrollment_basis <- "total"
 #   "recalculated" = divide each statewide pool by its weighted count
 weighted_rate_method <- "recalculated"
 
+# The pool amounts are supplied in the funding calculator. Per implementation
+# guidance from Nick Johnson of POLYTECH School District, Opportunity and
+# Operational Funding are treated as fixed statewide pools. When the eligible
+# weighted counts or reporting scope change, the per-weighted-student rates are
+# recalculated so that the full pools are distributed.
+weighted_pool_amount_source <-
+  "Copy of Calculator for 25-26 w Charter (003).xlsm"
+weighted_rate_guidance_source <-
+  "Nick Johnson, POLYTECH School District"
+weighted_rate_guidance_note <- paste(
+  "Treat Opportunity and Operational Funding as fixed statewide pools and",
+  "recalculate the per-weighted-student rates from the eligible weighted counts."
+)
+
 opportunity_funding_pool <- 163000000
 operational_funding_pool <- 279026800
 
@@ -87,6 +101,10 @@ funding_rates_path <- file.path(input_dir, "funding_rates.csv")
 lea_crosswalk_path <- file.path(input_dir, "lea_crosswalk.csv")
 entity_crosswalk_path <- file.path(input_dir, "entity_crosswalk.csv")
 current_rate_map_path <- file.path(input_dir, "current_rate_map.csv")
+report_component_crosswalk_path <- file.path(
+  input_dir,
+  "report_component_crosswalk.csv"
+)
 current_school_supplement_path <- file.path(
   input_dir,
   "current_school_supplement.csv"

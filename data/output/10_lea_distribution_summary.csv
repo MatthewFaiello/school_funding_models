@@ -1,3 +1,3 @@
 Comparison,LEACount,CurrentFundingTotal,ProposedFundingTotal,FundingDifferenceTotal,StatewideAggregatePercentDifference,MeanLEAPercentDifference,MedianLEAPercentDifference,LEAPercentQ1,LEAPercentQ3,MinimumLEAPercentDifference,MaximumLEAPercentDifference,MeanLEADollarDifference,MedianLEADollarDifference,EnrollmentWeightedMeanPercentDifference
-Position-based: proposed Base plus Central Office,42,1562248440.22,1607292320.36,45043880.14,2.883273,9.406025,9.232488,2.587629,15.090768,-0.637178,24.793523,1072473.34,888860.84,3.252114
-Gross full model: all four proposed sections,42,1562248440.22,2049319120.36,487070680.14,31.177543,40.082107,39.020424,29.367647,48.16575,20.582253,66.923562,11596920.96,4772701.03,31.532622
+Position-based: proposed Base plus Central Office,42,1562248440.22,1614026350.72,51777910.5,3.31432,9.787012,9.439639,3.120173,15.309235,-0.428003,24.973838,1232807.39,971328.69,3.691352
+Gross full model: all four proposed sections,42,1562248440.22,2056053150.72,493804710.5,31.60859,40.463094,39.641783,29.583767,48.366118,20.795629,67.137111,11757255.01,4794787.26,31.97186

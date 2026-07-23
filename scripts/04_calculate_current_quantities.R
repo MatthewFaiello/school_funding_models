@@ -163,7 +163,7 @@ current_model_rules <- tribble(
   ~CalculationLevel, ~Component, ~QuantityType, ~SourceField, ~Rule,
 
   "School", "Division I Teacher - Pre-K", "Position", "UnitsPreK",
-  "Use reported Basic Pre-K special education positions.",
+  "Use reported Basic Pre-K special education positions; the available Unit Count source does not include the corresponding Pre-K headcount needed to independently reproduce the 1:8.4 ratio.",
 
   "School", "Division I Teacher - K-3 Regular Education", "Position", "UnitsK3",
   "Use reported positions.",
@@ -705,19 +705,25 @@ satellite_issue <- school_input |>
 policy_issues <- tribble(
   ~Priority, ~Component, ~Issue, ~AffectedRows, ~CurrentTreatment, ~Action,
 
-  "Documented assumption",
+  "Confirmed Unit Count source rule",
   "School-based positions",
-  "The current model uses one school code as one school.",
+  "An officially coded Unit Count school is the recognized school-building calculation unit.",
   NA_integer_,
-  "Rows without a school code retain vocational adjustments but receive no other school-based positions.",
-  "Revise only if the current-model definition changes.",
+  paste(
+    "Multiple physical sites under one school code are treated as one calculation unit;",
+    "rows without a school code retain vocational adjustments but receive no other school-based positions."
+  ),
+  "Revise only if the official Unit Count school-building definition changes.",
 
-  "Policy question",
-  "Division I special education teachers",
-  "Charter Pre-K eligibility cannot be isolated.",
+  "Source limitation",
+  "Division I Teacher - Pre-K",
+  paste(
+    "Unit Count does not provide the special education Pre-K student headcount",
+    "needed to independently reproduce the 1:8.4 position ratio."
+  ),
   NA_integer_,
-  "EnrollmentPreK and UnitsPreK are treated as Basic Pre-K special education.",
-  "Confirm whether a separate charter exclusion is required.",
+  "The pipeline uses the reported UnitsPreK quantity without recalculation.",
+  "Retain the reported quantity unless a validated Pre-K headcount source becomes available.",
 
   "Policy question",
   "Nurse",

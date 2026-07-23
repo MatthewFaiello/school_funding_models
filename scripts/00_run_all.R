@@ -49,6 +49,9 @@ write_run_settings <- function() {
       "DAFB district code",
       "Operational enrollment basis",
       "Weighted rate method",
+      "Weighted pool amount source",
+      "Weighted rate guidance source",
+      "Weighted rate guidance note",
       "Opportunity funding pool",
       "Operational funding pool",
       "Charter student allocation method",
@@ -71,6 +74,9 @@ write_run_settings <- function() {
       as.character(dafb_district_code),
       operational_enrollment_basis,
       weighted_rate_method,
+      weighted_pool_amount_source,
+      weighted_rate_guidance_source,
+      weighted_rate_guidance_note,
       as.character(opportunity_funding_pool),
       as.character(operational_funding_pool),
       charter_student_allocation_method,
@@ -140,7 +146,8 @@ pipeline_scripts <- c(
   "07_calculate_proposed_quantities.R",
   "08_apply_proposed_rates.R",
   "09_compare_models.R",
-  "10_reporting_analysis.R"
+  "10_reporting_analysis.R",
+  "11_create_report_outputs.R"
 )
 
 tryCatch(

@@ -153,6 +153,17 @@ proposed_weighted_rate_summary <- quantities |>
     } else {
       ProvidedFundingRate
     },
+    FundingPoolSource = weighted_pool_amount_source,
+    RateMethodSource = if_else(
+      weighted_rate_method == "recalculated",
+      weighted_rate_guidance_source,
+      weighted_pool_amount_source
+    ),
+    RateMethodNote = if_else(
+      weighted_rate_method == "recalculated",
+      weighted_rate_guidance_note,
+      "Use the calculator-supplied per-weighted-student rate."
+    ),
     OperationalEnrollmentBasis = operational_enrollment_basis,
     CharterBuildingPolicy = charter_building_policy,
     StatewideScope = "Excludes DAFB"
@@ -166,6 +177,9 @@ proposed_weighted_rate_summary <- quantities |>
     ProvidedFundingRate,
     SelectedMethod,
     SelectedFundingRate,
+    FundingPoolSource,
+    RateMethodSource,
+    RateMethodNote,
     OperationalEnrollmentBasis,
     CharterBuildingPolicy
   )

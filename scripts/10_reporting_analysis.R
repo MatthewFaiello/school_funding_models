@@ -196,6 +196,9 @@ adjusted_rates <- proposed_adjusted |>
     RatePercentChange = percent_difference(AdjustedFundingRate, OriginalFundingRate),
     AdjustedFundingAmount = AdjustedWeightedCount * AdjustedFundingRate,
     ReportingScope = paste("Excludes DAFB and", excluded_lea_name),
+    FundingPoolSource = weighted_pool_amount_source,
+    RateMethodSource = weighted_rate_guidance_source,
+    RateMethodNote = weighted_rate_guidance_note,
     PoolTreatment = "Fixed pool retained and redistributed across the adjusted reporting scope"
   ) |>
   arrange(FundingSection)
@@ -336,7 +339,8 @@ refresh_comparison <- function(source_data, level = c("School", "LEA")) {
       ProposedFullModelFundingPerStudent = safe_divide(ProposedModelFundingAmount, Enrollment),
       AdjustedReportingScope = TRUE,
       ExcludedLEA = excluded_lea_name,
-      WeightedPoolTreatment = "Fixed pools redistributed across the adjusted reporting scope"
+      WeightedPoolTreatment = "Fixed pools redistributed across the adjusted reporting scope",
+      WeightedRateMethodSource = weighted_rate_guidance_source
     )
 
   if (level == "LEA") {
@@ -385,9 +389,9 @@ scope_counts <- shared_school |>
 
 current_state <- current_adjusted |>
   summarise(
-    CurrentConfirmedFundingAmount = sum(ConfirmedFundingAmount, na.rm = TRUE),
-    CurrentMappedFundingAmount = sum(MappedFundingAmount, na.rm = TRUE),
-    CurrentAssumptionFundingAmount = sum(AssumptionFundingAmount, na.rm = TRUE),
+    CurrentCalculatorSuppliedFundingAmount = sum(CalculatorSuppliedFundingAmount, na.rm = TRUE),
+    CurrentDocumentedCrosswalkFundingAmount = sum(DocumentedCrosswalkFundingAmount, na.rm = TRUE),
+    CurrentAnalyticalAssumptionFundingAmount = sum(AnalyticalAssumptionFundingAmount, na.rm = TRUE),
     CurrentModelFundingAmount = sum(FundingAmount, na.rm = TRUE),
     CurrentComponentsMissingInput = n_distinct(Component[!InputComplete]),
     CurrentRowsMissingInput = sum(!InputComplete),

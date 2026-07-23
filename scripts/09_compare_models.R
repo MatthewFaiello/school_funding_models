@@ -104,9 +104,9 @@ current_school_records <- read_csv(
       IsSchool ~ "School",
       TRUE ~ "Vocational/program record"
     ),
-    CurrentConfirmedFundingAmount = ConfirmedFundingAmount,
-    CurrentMappedFundingAmount = MappedFundingAmount,
-    CurrentAssumptionFundingAmount = AssumptionFundingAmount,
+    CurrentCalculatorSuppliedFundingAmount = CalculatorSuppliedFundingAmount,
+    CurrentDocumentedCrosswalkFundingAmount = DocumentedCrosswalkFundingAmount,
+    CurrentAnalyticalAssumptionFundingAmount = AnalyticalAssumptionFundingAmount,
     CurrentModelFundingAmount = TotalModeledFundingAmount,
     CurrentComponentsMissingInput = ComponentsMissingInput,
     CurrentRowsMissingInput = NA_integer_,
@@ -135,9 +135,9 @@ current_lea_records <- read_csv(
     SchoolCode = NA_integer_,
     SchoolName = "LEA Total",
     RecordType = "LEA",
-    CurrentConfirmedFundingAmount = ConfirmedFundingAmount,
-    CurrentMappedFundingAmount = MappedFundingAmount,
-    CurrentAssumptionFundingAmount = AssumptionFundingAmount,
+    CurrentCalculatorSuppliedFundingAmount = CalculatorSuppliedFundingAmount,
+    CurrentDocumentedCrosswalkFundingAmount = DocumentedCrosswalkFundingAmount,
+    CurrentAnalyticalAssumptionFundingAmount = AnalyticalAssumptionFundingAmount,
     CurrentModelFundingAmount = TotalModeledFundingAmount,
     CurrentComponentsMissingInput = ComponentsMissingInput,
     CurrentRowsMissingInput = NA_integer_,
@@ -153,12 +153,12 @@ current_state_source <- read_csv(
 
 current_state_records <- current_state_source |>
   summarise(
-    CurrentConfirmedFundingAmount =
-      sum(ConfirmedFundingAmount, na.rm = TRUE),
-    CurrentMappedFundingAmount =
-      sum(MappedFundingAmount, na.rm = TRUE),
-    CurrentAssumptionFundingAmount =
-      sum(AssumptionFundingAmount, na.rm = TRUE),
+    CurrentCalculatorSuppliedFundingAmount =
+      sum(CalculatorSuppliedFundingAmount, na.rm = TRUE),
+    CurrentDocumentedCrosswalkFundingAmount =
+      sum(DocumentedCrosswalkFundingAmount, na.rm = TRUE),
+    CurrentAnalyticalAssumptionFundingAmount =
+      sum(AnalyticalAssumptionFundingAmount, na.rm = TRUE),
     CurrentModelFundingAmount =
       sum(TotalModeledFundingAmount, na.rm = TRUE),
     CurrentComponentsMissingInput = n_distinct(
@@ -459,9 +459,9 @@ model_comparison <- full_join(
     SchoolCode,
     SchoolName,
     ModelMatchStatus,
-    CurrentConfirmedFundingAmount,
-    CurrentMappedFundingAmount,
-    CurrentAssumptionFundingAmount,
+    CurrentCalculatorSuppliedFundingAmount,
+    CurrentDocumentedCrosswalkFundingAmount,
+    CurrentAnalyticalAssumptionFundingAmount,
     CurrentModelFundingAmount,
     CurrentComponentsMissingInput,
     CurrentRowsMissingInput,

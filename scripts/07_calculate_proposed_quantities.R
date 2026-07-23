@@ -6,6 +6,9 @@
 #
 # RawInputValue and AppliedFactor remain visible so weighted counts and simple
 # ratio formulas can be audited without reverse engineering the code.
+#
+# Interpretation rule: when the proposed model does not explicitly change a
+# calculation detail, the corresponding current-model treatment is retained.
 # =============================================================================
 
 source(file.path("scripts", "00_settings.R"))
@@ -179,7 +182,7 @@ proposed_model_rules <- tribble(
   "Instructional Supports",
   "Position",
   "BaseDivisionIPositions",
-  "Twenty percent of Base Division I positions.",
+  "Twenty percent of all Base Division I positions, including vocational/program adjustment rows.",
 
   "Base Funding (State Support)",
   "Administrative Support Professionals",
@@ -276,22 +279,26 @@ proposed_model_rules <- tribble(
   "Assistant Superintendent",
   "Assistant Superintendent",
   "Position",
-  "UnitsTotal",
-  "One per completed 300 Division I positions, capped at two.",
+  "TotalBasePositions",
+  paste(
+    "One per completed 300 Total Base positions, capped at two.",
+    "The proposed materials do not explicitly authorize fractional positions,",
+    "so the current-model completed-threshold rule is retained."
+  ),
 
   "Central Office Funding (State Support)",
   "Director",
   "Director",
   "Position",
-  "UnitsTotal",
-  "One at 200 positions plus one per completed additional 100, capped at six.",
+  "TotalBasePositions",
+  "One at 200 Total Base positions plus one per completed additional 100, capped at six.",
 
   "Central Office Funding (State Support)",
   "11-Month Supervisor",
   "11-Month Supervisor",
   "Position",
-  "UnitsTotal",
-  "Division I positions divided by 150.",
+  "TotalBasePositions",
+  "Total Base positions divided by 150; fractional positions are retained.",
 
   "Central Office Funding (State Support)",
   "Buildings and Grounds Supervisor",
@@ -304,8 +311,8 @@ proposed_model_rules <- tribble(
   "Food Services Supervisor",
   "Food Services Supervisor",
   "Position",
-  "UnitsTotal",
-  "One per LEA plus one per completed 500 positions beyond the first 500.",
+  "BaseDivisionIPositions",
+  "One per LEA plus one per completed 500 Base Division I positions beyond the first 500.",
 
   "Central Office Funding (State Support)",
   "Transportation Supervisor",
@@ -347,10 +354,7 @@ school_calculations <- school_input |>
       TRUE ~ 0
     ),
 
-    InstructionalSupportPositions = case_when(
-      IsSchoolCalculationUnit ~ BaseDivisionIPositions * 0.20,
-      TRUE ~ 0
-    ),
+    InstructionalSupportPositions = BaseDivisionIPositions * 0.20,
 
     AdministrativeSupportBase =
       BaseDivisionIPositions +
@@ -496,8 +500,15 @@ base_components <- bind_rows(
       AppliedFactor = 0.20,
       FundingQuantity = InstructionalSupportPositions,
       CalculationStatus = case_when(
-        IsSchoolCalculationUnit ~ "Calculated",
-        TRUE ~ "Not a school calculation unit"
+        IsSchoolCalculationUnit ~
+          "Calculated from school calculation-unit Base Division I positions",
+        abs(BaseDivisionIPositions) > 1e-8 ~
+          paste(
+            "Calculated from non-school vocational/program",
+            "Base Division I positions"
+          ),
+        TRUE ~
+          "Calculated; Base Division I positions equal zero"
       )
     ),
   school_calculations |>
@@ -661,20 +672,69 @@ weighted_components <- bind_rows(
 
 
 # CENTRAL OFFICE CALCULATIONS ---------------------------------------------------
+#
+# The proposed workbook distinguishes between:
+#   1. Base Division I positions: enrollment-driven teachers plus net vocational
+#      positions; and
+#   2. Total Base positions: Base Division I plus Principal, Assistant Principal,
+#      Administrative Support Professionals, and Instructional Supports.
+#
+# Assistant Superintendent, Director, and 11-Month Supervisor use Total Base
+# positions. Food Services Supervisor uses the narrower Base Division I subtotal.
+# When the proposed materials do not explicitly change threshold completion or
+# fractional-position treatment, the corresponding current-model rule is retained.
+
+lea_base_totals <- school_calculations |>
+  summarise(
+    BaseDivisionIPositions = sum(BaseDivisionIPositions, na.rm = TRUE),
+    PrincipalPositions = sum(PrincipalPositions, na.rm = TRUE),
+    AssistantPrincipalPositions = sum(AssistantPrincipalPositions, na.rm = TRUE),
+    AdministrativeSupportPositions =
+      sum(AdministrativeSupportPositions, na.rm = TRUE),
+    InstructionalSupportPositions =
+      sum(InstructionalSupportPositions, na.rm = TRUE),
+    .by = c(DistrictCode, DistrictName)
+  ) |>
+  mutate(
+    TotalBasePositions =
+      BaseDivisionIPositions +
+      PrincipalPositions +
+      AssistantPrincipalPositions +
+      AdministrativeSupportPositions +
+      InstructionalSupportPositions
+  )
 
 lea_calculations <- lea_input |>
+  left_join(
+    lea_base_totals,
+    by = c("DistrictCode", "DistrictName")
+  ) |>
   mutate(
     Superintendent = 1,
     `Administrative Assistant` = 1,
-    `Assistant Superintendent` = pmin(floor(UnitsTotal / 300), 2),
-    Director = director_positions(UnitsTotal),
-    `11-Month Supervisor` = UnitsTotal / 150,
+
+    # The proposed rule does not explicitly authorize fractional Assistant
+    # Superintendent positions. Retain the current-model completed-threshold rule.
+    `Assistant Superintendent` =
+      pmin(floor(TotalBasePositions / 300), 2),
+
+    Director = director_positions(TotalBasePositions),
+    `11-Month Supervisor` = TotalBasePositions / 150,
     `Buildings and Grounds Supervisor` = 1,
     `Food Services Supervisor` =
-      1 + floor(pmax(UnitsTotal - 500, 0) / 500),
+      1 + floor(pmax(BaseDivisionIPositions - 500, 0) / 500),
     `Transportation Supervisor` = Enrollment / 7500,
     `Reading Cadre` = 1
   )
+
+stop_if_rows(
+  lea_calculations |>
+    filter(
+      is.na(BaseDivisionIPositions) |
+      is.na(TotalBasePositions)
+    ),
+  "An LEA is missing its proposed Base-position totals."
+)
 
 central_components <- bind_rows(
   lea_calculations |>
@@ -696,26 +756,31 @@ central_components <- bind_rows(
   lea_calculations |>
     mutate(
       Component = "Assistant Superintendent",
-      RawInputValue = UnitsTotal,
+      RawInputValue = TotalBasePositions,
       AppliedFactor = NA_real_,
       FundingQuantity = `Assistant Superintendent`,
-      CalculationStatus = "Completed 300-position thresholds"
+      CalculationStatus = paste(
+        "Calculated from Total Base positions using completed",
+        "300-position thresholds; maximum two"
+      )
     ),
   lea_calculations |>
     mutate(
       Component = "Director",
-      RawInputValue = UnitsTotal,
+      RawInputValue = TotalBasePositions,
       AppliedFactor = NA_real_,
       FundingQuantity = Director,
-      CalculationStatus = "Calculated using threshold formula"
+      CalculationStatus =
+        "Calculated from Total Base positions using completed thresholds"
     ),
   lea_calculations |>
     mutate(
       Component = "11-Month Supervisor",
-      RawInputValue = UnitsTotal,
+      RawInputValue = TotalBasePositions,
       AppliedFactor = 1 / 150,
       FundingQuantity = `11-Month Supervisor`,
-      CalculationStatus = "Calculated"
+      CalculationStatus =
+        "Calculated from Total Base positions; fractional positions retained"
     ),
   lea_calculations |>
     mutate(
@@ -728,10 +793,11 @@ central_components <- bind_rows(
   lea_calculations |>
     mutate(
       Component = "Food Services Supervisor",
-      RawInputValue = UnitsTotal,
+      RawInputValue = BaseDivisionIPositions,
       AppliedFactor = NA_real_,
       FundingQuantity = `Food Services Supervisor`,
-      CalculationStatus = "Calculated using threshold formula"
+      CalculationStatus =
+        "Calculated from Base Division I positions using completed thresholds"
     ),
   lea_calculations |>
     mutate(
@@ -903,7 +969,7 @@ charter_adjustment_issue <- if (charter_adjustment_count > 0) {
 assumption_issues <- tribble(
   ~Priority, ~Component, ~Issue, ~AffectedRows, ~CurrentTreatment, ~Action,
 
-  "Confirmed policy",
+  "Calculator-reproduced structure",
   "School-based positions",
   "Districts use school codes while charters use calculator building rows.",
   NA_integer_,
@@ -924,23 +990,25 @@ assumption_issues <- tribble(
   "Operational Funding - Enrollment",
   "Operational Enrollment uses total enrollment.",
   NA_integer_,
-  paste0("The pipeline applies", operational_enrollment_basis, "enrollment multiplied by 0.20."),
+  paste0("The pipeline applies ", operational_enrollment_basis, " enrollment multiplied by 0.20."),
   "Revise only if the confirmed policy changes.",
   
-  "Confirmed policy",
+  "Externally provided implementation guidance",
   "Opportunity and Operational Funding",
   paste(
-    "Opportunity and Operational Funding use fixed statewide pools.",
-    "Weights remain fixed, while per-weighted-student rates are",
-    "recalculated as eligible weighted enrollment changes."
+    "Per guidance from", weighted_rate_guidance_source,
+    "Opportunity and Operational Funding are treated as fixed statewide pools."
   ),
   NA_integer_,
   paste(
-    "The pipeline uses the calculator amounts:",
-    "$163,000,000 for Opportunity Funding and",
-    "$279,026,800 for Operational Funding."
+    "The pool amounts come from", weighted_pool_amount_source,
+    "and the per-weighted-student rates are recalculated whenever eligible",
+    "weighted counts or the reporting scope change."
   ),
-  "Update the pool amounts only when the authoritative calculator changes.",
+  paste(
+    "Update the pool amounts when the authoritative source changes;",
+    "revise the recalculation method only if the implementation guidance changes."
+  ),
 
   "Documented assumption",
   "Dover Air Force Base",
@@ -949,19 +1017,42 @@ assumption_issues <- tribble(
   "IncludeInStatewide is FALSE for DAFB.",
   "Change lea_crosswalk.csv only if the statewide universe changes.",
 
-  "Difference from calculator",
+  "Documented implementation choice",
   "Assistant Superintendent",
-  "The calculator appears to allow proportional positions.",
+  paste(
+    "The workbook formula appears to allow a proportional second position,",
+    "but the proposed rule does not explicitly authorize fractions."
+  ),
   NA_integer_,
-  "The pipeline uses completed 300-position thresholds, capped at two.",
-  "Change only if the written rule is formally revised.",
+  paste(
+    "The pipeline applies completed 300-position thresholds to Total Base",
+    "positions, capped at two, following the current-model default rule."
+  ),
+  "Revise only if fractional eligibility is explicitly confirmed.",
 
-  "Confirmed policy",
-  "Instructional Supports",
-  "Instructional Supports equal 20 percent of Base Division I positions.",
+  "Documented interpretation",
+  "Central Office position base",
+  paste(
+    "Assistant Superintendent, Director, and 11-Month Supervisor use Total Base",
+    "positions: Base Division I plus Principal, Assistant Principal,",
+    "Administrative Support Professionals, and Instructional Supports."
+  ),
   NA_integer_,
-  "The pipeline applies 20 percent.",
-  "Revise the 0.20 factor in Script 07 only if the policy changes.",
+  paste(
+    "Food Services Supervisor continues to use the narrower Base Division I",
+    "subtotal, consistent with the calculator rule."
+  ),
+  "Maintain the Base subtotal definitions when formulas or source workbooks change.",
+
+  "Calculator-reproduced rule",
+  "Instructional Supports",
+  "Instructional Supports equal 20 percent of all Base Division I positions.",
+  NA_integer_,
+  paste(
+    "The factor is applied to school calculation units and to non-school",
+    "vocational/program adjustment rows with Base Division I positions."
+  ),
+  "Revise the 0.20 factor or eligible position base only if the policy changes.",
 
   "Difference from calculator",
   "Additional State Funding",

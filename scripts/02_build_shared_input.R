@@ -96,7 +96,6 @@ unit_count <- read_excel(
   col_names = workbook_columns,
   col_types = c("text", "text", rep("numeric", 16))
 ) |>
-  filter(!is.na(SourceDistrictName), !is.na(SourceSchoolName)) |>
   mutate(SourceExcelRow = row_number() + 2L)
 
 add_enrollment_totals <- function(data) {

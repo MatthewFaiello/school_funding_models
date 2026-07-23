@@ -1,0 +1,62 @@
+SourceModel,SourceComponent,ReportSection,ReportComponent,ComparisonGroup,DirectComparability,IncludeInMainReport,DisplayOrder,Note
+Current,Division I Teacher - K-3 Regular Education,Base / Division I,K-3 Regular Education Teachers,Base Division I,Direct,TRUE,10,
+Current,Division I Teacher - 4-12 Regular Education,Base / Division I,Grades 4-12 Regular Education Teachers,Base Division I,Direct,TRUE,20,
+Current,Division I Teacher - Pre-K,Base / Division I,Basic Special Education Teachers,Base Division I,Partial,TRUE,30,Combined with current Basic K-12 units for comparison with the proposed Pre-K-12 Basic category.
+Current,Division I Teacher - Basic Special Education,Base / Division I,Basic Special Education Teachers,Base Division I,Partial,TRUE,30,Combined with current Basic Pre-K units for comparison with the proposed Pre-K-12 Basic category.
+Current,Division I Teacher - Intensive Special Education,Base / Division I,Intensive Special Education Teachers,Base Division I,Direct,TRUE,40,
+Current,Division I Teacher - Complex Special Education,Base / Division I,Complex Special Education Teachers,Base Division I,Direct,TRUE,50,
+Current,Vocational Division I,Base / Division I,Net Vocational Division I Positions,Base Division I,Direct,TRUE,60,Reported vocational positions and the vocational deduction are combined as a net quantity.
+Current,Vocational Deduct,Base / Division I,Net Vocational Division I Positions,Base Division I,Direct,TRUE,60,Reported vocational positions and the vocational deduction are combined as a net quantity.
+Current,Principal,Base administration,Principal,Additional Base,Direct,TRUE,70,
+Current,Assistant Principal,Base administration,Assistant Principal,Additional Base,Direct,TRUE,80,
+Current,Secretary,Base administration,Administrative Support Professionals,Additional Base,Partial,TRUE,90,Current secretaries are compared with the broader proposed Administrative Support Professionals category.
+Current,Counselor / Social Worker,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,School Psychologist,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Nurse,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Academic Excellence,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Driver Education Teacher,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Related Services Specialist - Basic,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Related Services Specialist - Intensive,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Related Services Specialist - Complex,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Visiting Teacher,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Separate current-model support functions are aggregated for comparison with the proposed consolidated Instructional Supports category.
+Current,Custodians,School operations,Current School Operations Positions,Not directly comparable,No,FALSE,110,No directly equivalent position category is separately identified in the proposed Base section; current inputs or rates are also incomplete.
+Current,Cafeteria Manager,School operations,Current School Operations Positions,Not directly comparable,No,FALSE,110,No directly equivalent position category is separately identified in the proposed Base section; current inputs or rates are also incomplete.
+Current,Cafeteria Worker,School operations,Current School Operations Positions,Not directly comparable,No,FALSE,110,No directly equivalent position category is separately identified in the proposed Base section; current inputs or rates are also incomplete.
+Current,Superintendent,Central Office,Superintendent,Central Office,Direct,TRUE,200,
+Current,Administrative Assistant,Central Office,Administrative Assistant,Central Office,Direct,TRUE,210,
+Current,Assistant Superintendent,Central Office,Assistant Superintendent,Central Office,Direct,TRUE,220,
+Current,Director,Central Office,Director,Central Office,Direct,TRUE,230,
+Current,11-Month Supervisor,Central Office,11-Month Supervisor,Central Office,Direct,TRUE,240,
+Current,Buildings and Grounds Supervisor,Central Office,Buildings and Grounds Supervisor,Central Office,Direct,TRUE,250,
+Current,Food Services Supervisor,Central Office,Food Services Supervisor,Central Office,Direct,TRUE,260,
+Current,Transportation Supervisor,Central Office,Transportation Supervisor,Central Office,Direct,TRUE,270,
+Current,Reading Cadre,Central Office,Reading Cadre,Central Office,Direct,TRUE,280,
+Proposed,Division I Teacher - K-3 Regular Education,Base / Division I,K-3 Regular Education Teachers,Base Division I,Direct,TRUE,10,
+Proposed,Division I Teacher - 4-12 Regular Education,Base / Division I,Grades 4-12 Regular Education Teachers,Base Division I,Direct,TRUE,20,
+Proposed,Division I Teacher - Pre-K-12 Basic Special Education,Base / Division I,Basic Special Education Teachers,Base Division I,Partial,TRUE,30,Compared with the sum of current Basic Pre-K and Basic K-12 positions.
+Proposed,Division I Teacher - Intensive Special Education,Base / Division I,Intensive Special Education Teachers,Base Division I,Direct,TRUE,40,
+Proposed,Division I Teacher - Complex Special Education,Base / Division I,Complex Special Education Teachers,Base Division I,Direct,TRUE,50,
+Proposed,Vocational Division I,Base / Division I,Net Vocational Division I Positions,Base Division I,Direct,TRUE,60,Combined with the vocational deduction as a net quantity.
+Proposed,Vocational Deduct,Base / Division I,Net Vocational Division I Positions,Base Division I,Direct,TRUE,60,Combined with Vocational Division I as a net quantity.
+Proposed,Principal,Base administration,Principal,Additional Base,Direct,TRUE,70,
+Proposed,Assistant Principal,Base administration,Assistant Principal,Additional Base,Direct,TRUE,80,
+Proposed,Administrative Support Professionals,Base administration,Administrative Support Professionals,Additional Base,Partial,TRUE,90,Compared with current secretaries; category scope differs.
+Proposed,Instructional Supports,Instructional / student support,Instructional Supports,Additional Base,Partial,TRUE,100,Compared with the aggregate of separately named current support functions.
+Proposed,Superintendent,Central Office,Superintendent,Central Office,Direct,TRUE,200,
+Proposed,Administrative Assistant,Central Office,Administrative Assistant,Central Office,Direct,TRUE,210,
+Proposed,Assistant Superintendent,Central Office,Assistant Superintendent,Central Office,Direct,TRUE,220,
+Proposed,Director,Central Office,Director,Central Office,Direct,TRUE,230,
+Proposed,11-Month Supervisor,Central Office,11-Month Supervisor,Central Office,Direct,TRUE,240,
+Proposed,Buildings and Grounds Supervisor,Central Office,Buildings and Grounds Supervisor,Central Office,Direct,TRUE,250,
+Proposed,Food Services Supervisor,Central Office,Food Services Supervisor,Central Office,Direct,TRUE,260,
+Proposed,Transportation Supervisor,Central Office,Transportation Supervisor,Central Office,Direct,TRUE,270,
+Proposed,Reading Cadre,Central Office,Reading Cadre,Central Office,Direct,TRUE,280,
+Proposed,Opportunity Funding - Low Income,Opportunity Funding,Opportunity - Low Income,Weighted Funding,Not applicable,FALSE,310,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Opportunity Funding - Multilingual Learner,Opportunity Funding,Opportunity - Multilingual Learner,Weighted Funding,Not applicable,FALSE,320,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Enrollment,Operational Funding,Operational - Enrollment,Weighted Funding,Not applicable,FALSE,330,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Low Income,Operational Funding,Operational - Low Income,Weighted Funding,Not applicable,FALSE,340,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Multilingual Learner,Operational Funding,Operational - Multilingual Learner,Weighted Funding,Not applicable,FALSE,350,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Basic Special Education,Operational Funding,Operational - Basic Special Education,Weighted Funding,Not applicable,FALSE,360,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Intensive Special Education,Operational Funding,Operational - Intensive Special Education,Weighted Funding,Not applicable,FALSE,370,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Complex Special Education,Operational Funding,Operational - Complex Special Education,Weighted Funding,Not applicable,FALSE,380,The Recreated Current Model has no directly comparable weighted component in this pipeline.
+Proposed,Operational Funding - Vocational,Operational Funding,Operational - Vocational,Weighted Funding,Not applicable,FALSE,390,The Recreated Current Model has no directly comparable weighted component in this pipeline.

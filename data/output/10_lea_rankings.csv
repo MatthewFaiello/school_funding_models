@@ -1,31 +1,31 @@
 RankingTable,Rank,DistrictCode,DistrictName,LEAType,Enrollment,CurrentModelFundingAmount,ProposedPositionBasedFundingAmount,ProposedWeightedFundingAmount,ProposedModelFundingAmount,PositionBasedFundingDifference,PreliminaryPositionBasedPercentDifference,FullModelFundingDifference,PreliminaryFullModelPercentDifference
-Largest gross full-model percentage increases,1,72,East Side Charter School,Charter,460,4520869.66,5246679.83,2299716.83,7546396.66,725810.17,16.054658,3025527,66.923562
-Largest gross full-model percentage increases,2,9605,Academia Antonia Alonso,Charter,923,7696785.3,8499654.18,4342123.54,12841777.72,802868.88,10.431224,5144992.42,66.845991
-Largest gross full-model percentage increases,3,82,Kuumba Academy Charter School,Charter,556,5205558.98,6008650.86,2444952.46,8453603.32,803091.88,15.427582,3248044.34,62.395688
-Largest gross full-model percentage increases,4,76,Edison (Thomas A.) Charter School,Charter,538,5521900.79,6128049.45,2822498.79,8950548.24,606148.66,10.977174,3428647.45,62.091797
-Largest gross full-model percentage increases,5,9611,Great Oaks Charter School,Charter,141,2098145,2618349.06,752030.84,3370379.9,520204.06,24.793523,1272234.9,60.636176
-Largest gross full-model percentage increases,6,74,Campus Community School,Charter,402,3732561.9,4431251.2,1342923.89,5774175.09,698689.3,18.71876,2041613.19,54.69737
-Largest gross full-model percentage increases,7,9612,Freire Charter School Wilmington,Charter,370,4035779.96,4664653.08,1515662,6180315.08,628873.12,15.582443,2144535.12,53.138059
-Largest gross full-model percentage increases,8,92,Gateway Charter School,Charter,211,2926870.21,3588551.14,883749.8,4472300.94,661680.93,22.607116,1545430.73,52.801478
-Largest gross full-model percentage increases,9,9604,Early College High School at Del State,Charter,597,4636175.36,5374089.4,1667357.81,7041447.21,737914.04,15.916439,2405271.85,51.880519
-Largest gross full-model percentage increases,10,85,Academy of Dover Charter School,Charter,454,4723503.39,5364672.16,1707265.36,7071937.52,641168.77,13.574009,2348434.13,49.718057
-Smallest gross full-model percentage increases,1,29,Appoquinimink School District,District,12958,138263084.91,141700860.07,25019882.16,166720742.23,3437775.16,2.486401,28457657.32,20.582253
-Smallest gross full-model percentage increases,2,17,Cape Henlopen School District,District,6731,78449816.03,79019744.57,16908744.02,95928488.59,569928.54,0.726488,17478672.56,22.280068
-Smallest gross full-model percentage increases,3,89,Newark Charter School,Charter,3156,27344429.09,28838061.14,4793939.15,33632000.29,1493632.05,5.46229,6287571.2,22.993975
-Smallest gross full-model percentage increases,4,24,Smyrna School District,District,5721,63501133.17,64662465.51,14347163.79,79009629.3,1161332.34,1.828837,15508496.13,24.422393
-Smallest gross full-model percentage increases,5,31,Brandywine School District,District,10070,118536401.86,119870291.42,29215754.9,149086046.32,1333889.56,1.1253,30549644.46,25.772374
-Smallest gross full-model percentage increases,6,88,MOT Charter School,Charter,1390,11821894.33,12917026.51,1958227.78,14875254.29,1095132.18,9.263593,3053359.96,25.828009
-Smallest gross full-model percentage increases,7,10,Caesar Rodney School District,District,7868,87484500.99,88112730.03,22428892.06,110541622.09,628229.04,0.718103,23057121.1,26.355664
-Smallest gross full-model percentage increases,8,70,Charter School of Wilmington,Charter,980,6460302.16,7369933.76,834585.49,8204519.25,909631.6,14.080326,1744217.09,26.999002
-Smallest gross full-model percentage increases,9,33,Christina School District,District,12799,181180477.74,180026035.02,51442651.83,231468686.85,-1154442.72,-0.637178,50288209.11,27.755865
-Smallest gross full-model percentage increases,10,9606,First State Montessori Academy,Charter,648,5881134.02,6635332.74,959421.47,7594754.21,754198.72,12.824036,1713620.19,29.137581
-Largest position-based dollar decreases,1,33,Christina School District,District,12799,181180477.74,180026035.02,51442651.83,231468686.85,-1154442.72,-0.637178,50288209.11,27.755865
-Largest position-based dollar decreases,2,9611,Great Oaks Charter School,Charter,141,2098145,2618349.06,752030.84,3370379.9,520204.06,24.793523,1272234.9,60.636176
-Largest position-based dollar decreases,3,35,Woodbridge School District,District,2603,29271219.39,29806171.6,9783945.68,39590117.28,534952.21,1.827571,10318897.89,35.252709
-Largest position-based dollar decreases,4,80,Charter School of New Castle,Charter,759,6818142.22,7364959.8,2747316.83,10112276.63,546817.58,8.020038,3294134.41,48.314252
-Largest position-based dollar decreases,5,17,Cape Henlopen School District,District,6731,78449816.03,79019744.57,16908744.02,95928488.59,569928.54,0.726488,17478672.56,22.280068
-Largest position-based dollar decreases,6,71,Positive Outcomes Charter School,Charter,117,2496490.79,3082370.04,605452.21,3687822.25,585879.25,23.468112,1191331.46,47.720242
-Largest position-based dollar decreases,7,76,Edison (Thomas A.) Charter School,Charter,538,5521900.79,6128049.45,2822498.79,8950548.24,606148.66,10.977174,3428647.45,62.091797
-Largest position-based dollar decreases,8,9614,Sussex Montessori School,Charter,392,3950298.64,4568184.99,1207414.95,5775599.94,617886.35,15.64151,1825301.3,46.206666
-Largest position-based dollar decreases,9,10,Caesar Rodney School District,District,7868,87484500.99,88112730.03,22428892.06,110541622.09,628229.04,0.718103,23057121.1,26.355664
-Largest position-based dollar decreases,10,9612,Freire Charter School Wilmington,Charter,370,4035779.96,4664653.08,1515662,6180315.08,628873.12,15.582443,2144535.12,53.138059
+Largest gross full-model percentage increases,1,72,East Side Charter School,Charter,460,4520869.66,5256334.13,2299716.83,7556050.96,735464.47,16.268208,3035181.3,67.137111
+Largest gross full-model percentage increases,2,9605,Academia Antonia Alonso,Charter,923,7696785.3,8516259.42,4342123.54,12858382.96,819474.12,10.646966,5161597.66,67.061734
+Largest gross full-model percentage increases,3,82,Kuumba Academy Charter School,Charter,556,5205558.98,6019945.24,2444952.46,8464897.7,814386.26,15.64455,3259338.72,62.612656
+Largest gross full-model percentage increases,4,76,Edison (Thomas A.) Charter School,Charter,538,5521900.79,6139474.08,2822498.79,8961972.87,617573.29,11.184071,3440072.08,62.298694
+Largest gross full-model percentage increases,5,9611,Great Oaks Charter School,Charter,141,2098145,2622132.34,752030.84,3374163.18,523987.34,24.973838,1276018.18,60.816492
+Largest gross full-model percentage increases,6,74,Campus Community School,Charter,402,3732561.9,4439268.16,1342923.89,5782192.05,706706.26,18.933544,2049630.15,54.912154
+Largest gross full-model percentage increases,7,9612,Freire Charter School Wilmington,Charter,370,4035779.96,4672980.48,1515662,6188642.48,637200.52,15.788782,2152862.52,53.344398
+Largest gross full-model percentage increases,8,92,Gateway Charter School,Charter,211,2926870.21,3594816.23,883749.8,4478566.03,667946.02,22.82117,1551695.82,53.015532
+Largest gross full-model percentage increases,9,9604,Early College High School at Del State,Charter,597,4636175.36,5384007.89,1667357.81,7051365.7,747832.53,16.130376,2415190.34,52.094456
+Largest gross full-model percentage increases,10,85,Academy of Dover Charter School,Charter,454,4723503.39,5374270.29,1707265.36,7081535.65,650766.9,13.777208,2358032.26,49.921257
+Smallest gross full-model percentage increases,1,29,Appoquinimink School District,District,12958,138263084.91,141995880.96,25019882.16,167015763.12,3732796.05,2.699778,28752678.21,20.795629
+Smallest gross full-model percentage increases,2,17,Cape Henlopen School District,District,6731,78449816.03,79683838.05,16908744.02,96592582.07,1234022.02,1.573008,18142766.04,23.126588
+Smallest gross full-model percentage increases,3,89,Newark Charter School,Charter,3156,27344429.09,28897712.58,4793939.15,33691651.73,1553283.49,5.680439,6347222.64,23.212123
+Smallest gross full-model percentage increases,4,24,Smyrna School District,District,5721,63501133.17,65296902.18,14347163.79,79644065.97,1795769.01,2.827932,16142932.8,25.421488
+Smallest gross full-model percentage increases,5,31,Brandywine School District,District,10070,118536401.86,120120061.17,29215754.9,149335816.07,1583659.31,1.336011,30799414.21,25.983085
+Smallest gross full-model percentage increases,6,88,MOT Charter School,Charter,1390,11821894.33,12942297.74,1958227.78,14900525.52,1120403.41,9.477359,3078631.19,26.041776
+Smallest gross full-model percentage increases,7,10,Caesar Rodney School District,District,7868,87484500.99,88466758.74,22428892.06,110895650.8,982257.75,1.122779,23411149.81,26.76034
+Smallest gross full-model percentage increases,8,70,Charter School of Wilmington,Charter,980,6460302.16,7384337.87,834585.49,8218923.36,924035.71,14.303289,1758621.2,27.221965
+Smallest gross full-model percentage increases,9,33,Christina School District,District,12799,181180477.74,180405019.83,51442651.83,231847671.66,-775457.91,-0.428003,50667193.92,27.96504
+Smallest gross full-model percentage increases,10,9606,First State Montessori Academy,Charter,648,5881134.02,6648103.3,959421.47,7607524.77,766969.28,13.04118,1726390.75,29.354726
+Largest position-based dollar decreases,1,33,Christina School District,District,12799,181180477.74,180405019.83,51442651.83,231847671.66,-775457.91,-0.428003,50667193.92,27.96504
+Largest position-based dollar decreases,2,9611,Great Oaks Charter School,Charter,141,2098145,2622132.34,752030.84,3374163.18,523987.34,24.973838,1276018.18,60.816492
+Largest position-based dollar decreases,3,80,Charter School of New Castle,Charter,759,6818142.22,7378674.19,2747316.83,10125991.02,560531.97,8.221183,3307848.8,48.515398
+Largest position-based dollar decreases,4,71,Positive Outcomes Charter School,Charter,117,2496490.79,3087314.05,605452.21,3692766.26,590823.26,23.66615,1196275.47,47.918281
+Largest position-based dollar decreases,5,35,Woodbridge School District,District,2603,29271219.39,29867750.43,9783945.68,39651696.11,596531.04,2.037944,10380476.72,35.463083
+Largest position-based dollar decreases,6,76,Edison (Thomas A.) Charter School,Charter,538,5521900.79,6139474.08,2822498.79,8961972.87,617573.29,11.184071,3440072.08,62.298694
+Largest position-based dollar decreases,7,9614,Sussex Montessori School,Charter,392,3950298.64,4576398.85,1207414.95,5783813.8,626100.21,15.84944,1833515.16,46.414596
+Largest position-based dollar decreases,8,9612,Freire Charter School Wilmington,Charter,370,4035779.96,4672980.48,1515662,6188642.48,637200.52,15.788782,2152862.52,53.344398
+Largest position-based dollar decreases,9,85,Academy of Dover Charter School,Charter,454,4723503.39,5374270.29,1707265.36,7081535.65,650766.9,13.777208,2358032.26,49.921257
+Largest position-based dollar decreases,10,87,Providence Creek Academy Charter School,Charter,786,7082090.6,7747943.02,1471164.27,9219107.29,665852.42,9.401919,2137016.69,30.174941

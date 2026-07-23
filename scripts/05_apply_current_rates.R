@@ -75,6 +75,19 @@ check_required_columns(
   "current_rate_map.csv"
 )
 
+valid_rate_categories <- c(
+  "Calculator-supplied",
+  "Documented crosswalk",
+  "Analytical assumption",
+  "Not available"
+)
+
+stop_if_rows(
+  rate_map |>
+    filter(!RateCategory %in% valid_rate_categories),
+  "current_rate_map.csv contains an unrecognized RateCategory."
+)
+
 stop_if_rows(
   rate_map |>
     count(Component) |>
@@ -113,20 +126,20 @@ current_model_funding_detail <- quantities |>
       TRUE ~ FundingQuantity * FundingRate
     ),
 
-    ConfirmedFundingAmount = case_when(
-      RateCategory %in% c("Direct", "Shared") & !is.na(FundingAmount) ~
+    CalculatorSuppliedFundingAmount = case_when(
+      RateCategory == "Calculator-supplied" & !is.na(FundingAmount) ~
         FundingAmount,
       TRUE ~ 0
     ),
 
-    MappedFundingAmount = case_when(
-      RateCategory == "Documented mapping" & !is.na(FundingAmount) ~
+    DocumentedCrosswalkFundingAmount = case_when(
+      RateCategory == "Documented crosswalk" & !is.na(FundingAmount) ~
         FundingAmount,
       TRUE ~ 0
     ),
 
-    AssumptionFundingAmount = case_when(
-      RateCategory == "Assumption" & !is.na(FundingAmount) ~
+    AnalyticalAssumptionFundingAmount = case_when(
+      RateCategory == "Analytical assumption" & !is.na(FundingAmount) ~
         FundingAmount,
       TRUE ~ 0
     ),
@@ -146,9 +159,9 @@ current_school_summary <- current_model_funding_detail |>
   filter(CalculationLevel == "School") |>
   summarise(
     CalculatedPositions = sum(FundingQuantity, na.rm = TRUE),
-    ConfirmedFundingAmount = sum(ConfirmedFundingAmount, na.rm = TRUE),
-    MappedFundingAmount = sum(MappedFundingAmount, na.rm = TRUE),
-    AssumptionFundingAmount = sum(AssumptionFundingAmount, na.rm = TRUE),
+    CalculatorSuppliedFundingAmount = sum(CalculatorSuppliedFundingAmount, na.rm = TRUE),
+    DocumentedCrosswalkFundingAmount = sum(DocumentedCrosswalkFundingAmount, na.rm = TRUE),
+    AnalyticalAssumptionFundingAmount = sum(AnalyticalAssumptionFundingAmount, na.rm = TRUE),
     TotalModeledFundingAmount = sum(FundingAmount, na.rm = TRUE),
     ComponentsMissingInput = n_distinct(Component[!InputComplete]),
     ComponentsMissingRate = n_distinct(
@@ -187,9 +200,9 @@ current_school_summary <- current_model_funding_detail |>
 current_lea_summary <- current_model_funding_detail |>
   summarise(
     CalculatedPositions = sum(FundingQuantity, na.rm = TRUE),
-    ConfirmedFundingAmount = sum(ConfirmedFundingAmount, na.rm = TRUE),
-    MappedFundingAmount = sum(MappedFundingAmount, na.rm = TRUE),
-    AssumptionFundingAmount = sum(AssumptionFundingAmount, na.rm = TRUE),
+    CalculatorSuppliedFundingAmount = sum(CalculatorSuppliedFundingAmount, na.rm = TRUE),
+    DocumentedCrosswalkFundingAmount = sum(DocumentedCrosswalkFundingAmount, na.rm = TRUE),
+    AnalyticalAssumptionFundingAmount = sum(AnalyticalAssumptionFundingAmount, na.rm = TRUE),
     TotalModeledFundingAmount = sum(FundingAmount, na.rm = TRUE),
     ComponentsMissingInput = n_distinct(Component[!InputComplete]),
     ComponentsMissingRate = n_distinct(
@@ -226,9 +239,9 @@ current_state_summary <- current_model_funding_detail |>
   filter(IncludeInStatewide) |>
   summarise(
     CalculatedPositions = sum(FundingQuantity, na.rm = TRUE),
-    ConfirmedFundingAmount = sum(ConfirmedFundingAmount, na.rm = TRUE),
-    MappedFundingAmount = sum(MappedFundingAmount, na.rm = TRUE),
-    AssumptionFundingAmount = sum(AssumptionFundingAmount, na.rm = TRUE),
+    CalculatorSuppliedFundingAmount = sum(CalculatorSuppliedFundingAmount, na.rm = TRUE),
+    DocumentedCrosswalkFundingAmount = sum(DocumentedCrosswalkFundingAmount, na.rm = TRUE),
+    AnalyticalAssumptionFundingAmount = sum(AnalyticalAssumptionFundingAmount, na.rm = TRUE),
     TotalModeledFundingAmount = sum(FundingAmount, na.rm = TRUE),
     RowsMissingInput = sum(!InputComplete),
     RowsMissingRate = sum(

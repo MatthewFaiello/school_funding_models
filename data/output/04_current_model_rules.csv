@@ -1,5 +1,5 @@
 CalculationLevel,Component,QuantityType,SourceField,Rule
-School,Division I Teacher - Pre-K,Position,UnitsPreK,Use reported Basic Pre-K special education positions.
+School,Division I Teacher - Pre-K,Position,UnitsPreK,Use reported Basic Pre-K special education positions; the available Unit Count source does not include the corresponding Pre-K headcount needed to independently reproduce the 1:8.4 ratio.
 School,Division I Teacher - K-3 Regular Education,Position,UnitsK3,Use reported positions.
 School,Division I Teacher - 4-12 Regular Education,Position,Units4_12,Use reported positions.
 School,Division I Teacher - Basic Special Education,Position,UnitsBasicK12,Use reported positions.
