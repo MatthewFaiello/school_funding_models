@@ -43,6 +43,7 @@ dafb_district_code <- 14L
 # Choose one:
 #   "total"      = total enrollment
 #   "regular_ed" = regular education enrollment only
+# Confirmed policy: Operational Funding - Enrollment uses total enrollment.
 operational_enrollment_basis <- "total"
 
 # Choose one:
@@ -81,7 +82,7 @@ charter_building_policy <- paste(
 
 unit_count_path <- file.path(input_dir, "unit_count.xlsx")
 student_counts_path <- file.path(input_dir, "student_counts.csv")
-calculator_path <- file.path(input_dir, "proposed_calculator.xlsm")
+calculator_path <- file.path(input_dir, "Copy of Calculator for 25-26 w Charter (003).xlsm")
 funding_rates_path <- file.path(input_dir, "funding_rates.csv")
 lea_crosswalk_path <- file.path(input_dir, "lea_crosswalk.csv")
 entity_crosswalk_path <- file.path(input_dir, "entity_crosswalk.csv")

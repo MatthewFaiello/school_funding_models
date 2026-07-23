@@ -179,7 +179,7 @@ proposed_model_rules <- tribble(
   "Instructional Supports",
   "Position",
   "BaseDivisionIPositions",
-  "Fifteen percent of Base Division I positions.",
+  "Twenty percent of Base Division I positions.",
 
   "Base Funding (State Support)",
   "Administrative Support Professionals",
@@ -348,7 +348,7 @@ school_calculations <- school_input |>
     ),
 
     InstructionalSupportPositions = case_when(
-      IsSchoolCalculationUnit ~ BaseDivisionIPositions * 0.15,
+      IsSchoolCalculationUnit ~ BaseDivisionIPositions * 0.20,
       TRUE ~ 0
     ),
 
@@ -493,7 +493,7 @@ base_components <- bind_rows(
     mutate(
       Component = "Instructional Supports",
       RawInputValue = BaseDivisionIPositions,
-      AppliedFactor = 0.15,
+      AppliedFactor = 0.20,
       FundingQuantity = InstructionalSupportPositions,
       CalculationStatus = case_when(
         IsSchoolCalculationUnit ~ "Calculated",
@@ -920,12 +920,27 @@ assumption_issues <- tribble(
   ),
   "Review the charter reconciliation after each source update.",
 
-  "Script setting",
+  "Confirmed policy",
   "Operational Funding - Enrollment",
-  "Operational enrollment can use total or regular education enrollment.",
+  "Operational Enrollment uses total enrollment.",
   NA_integer_,
-  paste0("This run uses '", operational_enrollment_basis, "'."),
-  "Change operational_enrollment_basis in 00_settings.R.",
+  paste0("The pipeline applies", operational_enrollment_basis, "enrollment multiplied by 0.20."),
+  "Revise only if the confirmed policy changes.",
+  
+  "Confirmed policy",
+  "Opportunity and Operational Funding",
+  paste(
+    "Opportunity and Operational Funding use fixed statewide pools.",
+    "Weights remain fixed, while per-weighted-student rates are",
+    "recalculated as eligible weighted enrollment changes."
+  ),
+  NA_integer_,
+  paste(
+    "The pipeline uses the calculator amounts:",
+    "$163,000,000 for Opportunity Funding and",
+    "$279,026,800 for Operational Funding."
+  ),
+  "Update the pool amounts only when the authoritative calculator changes.",
 
   "Documented assumption",
   "Dover Air Force Base",
@@ -941,12 +956,12 @@ assumption_issues <- tribble(
   "The pipeline uses completed 300-position thresholds, capped at two.",
   "Change only if the written rule is formally revised.",
 
-  "Difference from calculator",
+  "Confirmed policy",
   "Instructional Supports",
-  "The written rule specifies 15 percent while the calculator previously used 20 percent.",
+  "Instructional Supports equal 20 percent of Base Division I positions.",
   NA_integer_,
-  "The pipeline applies 15 percent.",
-  "Change only if the written rule is formally revised.",
+  "The pipeline applies 20 percent.",
+  "Revise the 0.20 factor in Script 07 only if the policy changes.",
 
   "Difference from calculator",
   "Additional State Funding",
