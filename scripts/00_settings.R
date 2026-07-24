@@ -1,8 +1,8 @@
 # =============================================================================
 # 00_settings.R
 # =============================================================================
-# Edit this file when the school year, source files, model options, or funding
-# pools change. All other R scripts read their settings from this file.
+# Maintained settings for this one-time FY2025-26 comparison.
+# Keep scope, labels, pools, and file paths here so later scripts stay simple.
 # =============================================================================
 
 # PROJECT FOLDERS ---------------------------------------------------------------
@@ -10,10 +10,19 @@
 project_dir <- normalizePath(".", winslash = "/", mustWork = FALSE)
 scripts_dir <- file.path(project_dir, "scripts")
 input_dir <- file.path(project_dir, "data", "input")
-output_dir <- file.path(project_dir, "data", "output")
+output_root_dir <- file.path(project_dir, "data", "output")
+intermediate_dir <- file.path(output_root_dir, "intermediate")
+final_dir <- file.path(output_root_dir, "final")
+audit_dir <- file.path(output_root_dir, "audit")
+
+# Steps 02-08 already use output_dir. Keep that name as a simple alias so their
+# validated calculation logic does not need to change.
+output_dir <- intermediate_dir
 
 dir.create(input_dir, recursive = TRUE, showWarnings = FALSE)
-dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(intermediate_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(final_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(audit_dir, recursive = TRUE, showWarnings = FALSE)
 
 
 # PACKAGES ----------------------------------------------------------------------
@@ -34,39 +43,55 @@ suppressPackageStartupMessages(
 )
 
 
-# RUN SETTINGS ------------------------------------------------------------------
+# ANALYSIS LABELS AND SCOPE ------------------------------------------------------
 
 school_year <- 2026L
 count_date <- as.Date("2025-09-30")
 dafb_district_code <- 14L
+basse_district_code <- 9615L
 
-# Choose one:
-#   "total"      = total enrollment
-#   "regular_ed" = regular education enrollment only
-# Confirmed policy: Operational Funding - Enrollment uses total enrollment.
+current_model_label <- "Recreated Current Staffing Rules"
+proposed_model_label <- "Independently Reproduced Proposed Staffing Rules"
+pefc_model_label <- "PEFC Workbook as Presented"
+
+primary_reporting_excluded_lea_codes <- c(dafb_district_code)
+primary_reporting_scope_label <- paste(
+  "Primary comparable-model scope:",
+  "includes BASSE and excludes DAFB pending confirmation"
+)
+primary_reporting_scope_short <-
+  "Includes BASSE; excludes DAFB pending confirmation"
+
+pefc_as_presented_scope_label <- paste(
+  "PEFC workbook scope as presented:",
+  "includes BASSE and includes DAFB in Base, Opportunity, and Operational",
+  "but not Central Office Funding"
+)
+
+comparison_tolerance <- 0.01
+
+
+# PROPOSED WEIGHTED FUNDING SETTINGS --------------------------------------------
+
+# Confirmed policy: Operational Funding uses total enrollment.
 operational_enrollment_basis <- "total"
 
-# Choose one:
-#   "provided"     = use the weighted rates in funding_rates.csv
-#   "recalculated" = divide each statewide pool by its weighted count
+# Fixed pools are divided by the eligible weighted counts in the modeled scope.
 weighted_rate_method <- "recalculated"
+opportunity_funding_pool <- 163000000
+operational_funding_pool <- 279026800
 
-# The pool amounts are supplied in the funding calculator. Per implementation
-# guidance from Nick Johnson of POLYTECH School District, Opportunity and
-# Operational Funding are treated as fixed statewide pools. When the eligible
-# weighted counts or reporting scope change, the per-weighted-student rates are
-# recalculated so that the full pools are distributed.
 weighted_pool_amount_source <-
   "Copy of Calculator for 25-26 w Charter (003).xlsm"
 weighted_rate_guidance_source <-
   "Nick Johnson, POLYTECH School District"
 weighted_rate_guidance_note <- paste(
   "Treat Opportunity and Operational Funding as fixed statewide pools and",
-  "recalculate the per-weighted-student rates from the eligible weighted counts."
+  "recalculate the per-weighted-student rates from eligible weighted counts."
 )
 
-opportunity_funding_pool <- 163000000
-operational_funding_pool <- 279026800
+
+# EXISTING CALCULATION SETTINGS -------------------------------------------------
 
 district_unit_tolerance <- 0.05
 state_units_total_tolerance <- 0.10
@@ -96,14 +121,21 @@ charter_building_policy <- paste(
 
 unit_count_path <- file.path(input_dir, "unit_count.xlsx")
 student_counts_path <- file.path(input_dir, "student_counts.csv")
-calculator_path <- file.path(input_dir, "Copy of Calculator for 25-26 w Charter (003).xlsm")
+calculator_path <- file.path(
+  input_dir,
+  "Copy of Calculator for 25-26 w Charter (003).xlsm"
+)
 funding_rates_path <- file.path(input_dir, "funding_rates.csv")
 lea_crosswalk_path <- file.path(input_dir, "lea_crosswalk.csv")
 entity_crosswalk_path <- file.path(input_dir, "entity_crosswalk.csv")
 current_rate_map_path <- file.path(input_dir, "current_rate_map.csv")
-report_component_crosswalk_path <- file.path(
+model_comparison_crosswalk_path <- file.path(
   input_dir,
-  "report_component_crosswalk.csv"
+  "model_comparison_crosswalk.csv"
+)
+current_opportunity_operational_path <- file.path(
+  input_dir,
+  "current_opportunity_operational_funding.csv"
 )
 current_school_supplement_path <- file.path(
   input_dir,
@@ -119,27 +151,18 @@ proposed_manual_allocations_path <- file.path(
 )
 
 
-# OUTPUT FILES ------------------------------------------------------------------
-
-# Each numbered script defines its own output filenames near the top. This keeps
-# the inputs and outputs for that step visible in the same file.
-
-
 # VALIDATE SETTINGS -------------------------------------------------------------
 
-valid_operational_bases <- c("total", "regular_ed")
-valid_rate_methods <- c("provided", "recalculated")
-
-if (!operational_enrollment_basis %in% valid_operational_bases) {
+if (operational_enrollment_basis != "total") {
   stop(
-    "operational_enrollment_basis must be total or regular_ed.",
+    "This FY2025-26 analysis expects total enrollment for Operational Funding.",
     call. = FALSE
   )
 }
 
-if (!weighted_rate_method %in% valid_rate_methods) {
+if (weighted_rate_method != "recalculated") {
   stop(
-    "weighted_rate_method must be provided or recalculated.",
+    "This FY2025-26 analysis expects recalculated weighted rates.",
     call. = FALSE
   )
 }
@@ -191,14 +214,10 @@ check_required_files <- function(paths) {
 
 # OUTPUT HELPERS ----------------------------------------------------------------
 
-# Model files retain full numeric precision. No rounding is applied unless it is
-# explicitly part of a documented business rule, such as floor-based thresholds.
 write_model_csv <- function(data, path) {
   write_csv(data, path, na = "")
 }
 
-# Review files are terminal presentation outputs. Rounding here never feeds back
-# into a later model calculation.
 round_review_output <- function(data) {
   is_review_number <- function(x) {
     is.double(x) && !inherits(x, c("Date", "POSIXct", "POSIXt"))

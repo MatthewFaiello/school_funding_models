@@ -1,34 +1,27 @@
 # =============================================================================
 # 00_run_all.R
 # =============================================================================
-# Runs every R step in order. Run the SQL file first and export student_counts.csv.
-# Creates a run settings file and a run-specific file manifest for audit.
+# Run the SQL file first and export student_counts.csv, then source this script.
+# Steps run in one linear sequence. Calculation detail is retained in
+# intermediate/, report-ready files go to final/, and QC goes to audit/.
 # =============================================================================
 
 source(file.path("scripts", "00_settings.R"))
 
-# Remove prior generated CSVs so a failed run cannot leave stale later-step
-# outputs that look current. Source and maintained files are in data/input/ and
-# are never removed here.
+# Remove prior generated CSVs so a failed run cannot leave stale results.
 prior_outputs <- list.files(
-  output_dir,
+  output_root_dir,
   pattern = "\\.csv$",
+  recursive = TRUE,
   full.names = TRUE
 )
 
-if (length(prior_outputs) > 0) {
-  removed_outputs <- file.remove(prior_outputs)
-
-  if (!all(removed_outputs)) {
-    stop(
-      "One or more prior output files could not be removed.",
-      call. = FALSE
-    )
-  }
+if (length(prior_outputs) > 0 && !all(file.remove(prior_outputs))) {
+  stop("One or more prior output files could not be removed.", call. = FALSE)
 }
 
-run_settings_path <- file.path(output_dir, "00_run_settings.csv")
-run_manifest_path <- file.path(output_dir, "00_run_manifest.csv")
+run_settings_path <- file.path(audit_dir, "00_run_settings.csv")
+run_manifest_path <- file.path(audit_dir, "00_run_manifest.csv")
 run_started_time <- Sys.time()
 run_completed_time <- as.POSIXct(NA)
 run_status <- "Started"
@@ -46,16 +39,15 @@ write_run_settings <- function() {
       "readxl version",
       "School year",
       "Count date",
-      "DAFB district code",
+      "Current model label",
+      "Proposed model label",
+      "PEFC model label",
+      "Primary reporting scope",
+      "Primary excluded LEA codes",
       "Operational enrollment basis",
       "Weighted rate method",
-      "Weighted pool amount source",
-      "Weighted rate guidance source",
-      "Weighted rate guidance note",
       "Opportunity funding pool",
-      "Operational funding pool",
-      "Charter student allocation method",
-      "Charter building policy"
+      "Operational funding pool"
     ),
     Value = c(
       format(run_started_time, "%Y-%m-%d %H:%M:%S %Z"),
@@ -71,16 +63,15 @@ write_run_settings <- function() {
       as.character(packageVersion("readxl")),
       as.character(school_year),
       as.character(count_date),
-      as.character(dafb_district_code),
+      current_model_label,
+      proposed_model_label,
+      pefc_model_label,
+      primary_reporting_scope_label,
+      paste(primary_reporting_excluded_lea_codes, collapse = ","),
       operational_enrollment_basis,
       weighted_rate_method,
-      weighted_pool_amount_source,
-      weighted_rate_guidance_source,
-      weighted_rate_guidance_note,
       as.character(opportunity_funding_pool),
-      as.character(operational_funding_pool),
-      charter_student_allocation_method,
-      charter_building_policy
+      as.character(operational_funding_pool)
     )
   )
 
@@ -96,18 +87,14 @@ file_row_count <- function(path) {
 }
 
 write_run_manifest <- function() {
-  input_files <- list.files(
-    input_dir,
-    recursive = TRUE,
-    full.names = TRUE
-  )
+  input_files <- list.files(input_dir, recursive = TRUE, full.names = TRUE)
   script_files <- list.files(
     scripts_dir,
     pattern = "\\.(R|sql)$",
     full.names = TRUE
   )
   output_files <- list.files(
-    output_dir,
+    output_root_dir,
     recursive = TRUE,
     full.names = TRUE
   )
@@ -146,8 +133,8 @@ pipeline_scripts <- c(
   "07_calculate_proposed_quantities.R",
   "08_apply_proposed_rates.R",
   "09_compare_models.R",
-  "10_reporting_analysis.R",
-  "11_create_report_outputs.R"
+  "10_reconcile_pefc_workbook.R",
+  "11_create_final_outputs.R"
 )
 
 tryCatch(
@@ -162,8 +149,9 @@ tryCatch(
     write_run_settings()
     write_run_manifest()
 
-    message("\nPipeline complete. Outputs are in: ", output_dir)
-    message("Review run manifest: ", run_manifest_path)
+    message("\nPipeline complete.")
+    message("Final outputs: ", final_dir)
+    message("Audit outputs: ", audit_dir)
   },
   error = function(error_condition) {
     run_status <<- "Failed"
