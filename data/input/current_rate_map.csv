@@ -9,15 +9,15 @@ Vocational Division I,Vocational Division I / Vocational Deduct,Calculator-suppl
 Vocational Deduct,Vocational Division I / Vocational Deduct,Calculator-supplied,The calculator supplies one common rate for Vocational Division I and the vocational deduction.
 Principal,Principal,Calculator-supplied,The calculator explicitly supplies this component rate.
 Assistant Principal,Assistant Principal,Calculator-supplied,The calculator explicitly supplies this component rate.
-Counselor / Social Worker,Instructional Supports,Analytical assumption,The analysis assigns the Instructional Supports rate.
-School Psychologist,Instructional Supports,Analytical assumption,The analysis assigns the Instructional Supports rate.
+Counselor / Social Worker,Instructional Supports,Documented crosswalk,"Externally confirmed functional crosswalk to Instructional Supports; applies the PEFC rate of $96,155 without implying identical position definitions."
+School Psychologist,Instructional Supports,Documented crosswalk,"Externally confirmed functional crosswalk to Instructional Supports; applies the PEFC rate of $96,155 without implying identical position definitions."
 Nurse,Instructional Supports,Documented crosswalk,The proposed model combines nursing into Instructional Supports.
 Academic Excellence,Instructional Supports,Documented crosswalk,The proposed model combines Academic Excellence into Instructional Supports.
-Secretary,Administrative Support Professionals,Analytical assumption,The analysis assigns the Administrative Support Professionals rate.
+Secretary,Administrative Support Professionals,Documented crosswalk,"Externally confirmed functional crosswalk to Administrative Support Professionals; applies the PEFC rate of $74,017 without implying identical position definitions."
 Driver Education Teacher,Instructional Supports,Documented crosswalk,The proposed model combines Driver Education into Instructional Supports.
-Custodians,,Not available,No defensible calculator rate or documented crosswalk was identified.
-Cafeteria Manager,,Not available,No defensible calculator rate or documented crosswalk was identified.
-Cafeteria Worker,,Not available,No defensible calculator rate or documented crosswalk was identified.
+Custodians,,Outside formula,Confirmed as funded outside the proposed position formula; excluded from the apples-to-apples position-based funding estimate and retained only for documentation.
+Cafeteria Manager,,Outside formula,Confirmed as funded outside the proposed position formula; excluded from the apples-to-apples position-based funding estimate and retained only for documentation.
+Cafeteria Worker,,Outside formula,Confirmed as funded outside the proposed position formula; excluded from the apples-to-apples position-based funding estimate and retained only for documentation.
 Superintendent,Superintendent,Calculator-supplied,The calculator explicitly supplies this component rate.
 Assistant Superintendent,Assistant Superintendent,Calculator-supplied,The calculator explicitly supplies this component rate.
 Director,Director,Calculator-supplied,The calculator explicitly supplies this component rate.
@@ -26,7 +26,7 @@ Administrative Assistant,Administrative Assistant,Calculator-supplied,The calcul
 Related Services Specialist - Basic,Instructional Supports,Documented crosswalk,The proposed model combines Related Services into Instructional Supports.
 Related Services Specialist - Intensive,Instructional Supports,Documented crosswalk,The proposed model combines Related Services into Instructional Supports.
 Related Services Specialist - Complex,Instructional Supports,Documented crosswalk,The proposed model combines Related Services into Instructional Supports.
-Visiting Teacher,Instructional Supports,Analytical assumption,The analysis assigns the Instructional Supports rate.
+Visiting Teacher,Instructional Supports,Documented crosswalk,"Externally confirmed functional crosswalk to Instructional Supports; applies the PEFC rate of $96,155 without implying identical position definitions."
 Buildings and Grounds Supervisor,Buildings and Grounds Supervisor,Calculator-supplied,The calculator explicitly supplies this component rate.
 Food Services Supervisor,Food Services Supervisor,Calculator-supplied,The calculator explicitly supplies this component rate.
 Transportation Supervisor,Transportation Supervisor,Calculator-supplied,The calculator explicitly supplies this component rate.

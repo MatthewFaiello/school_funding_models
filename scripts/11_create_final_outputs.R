@@ -39,6 +39,18 @@ input_paths <- c(
     audit_dir,
     "10_charter_building_treatment.csv"
   ),
+  outside_formula = file.path(
+    intermediate_dir,
+    "04_current_outside_formula_components.csv"
+  ),
+  district_cafeteria = file.path(
+    intermediate_dir,
+    "03_current_district_cafeteria_allocation.csv"
+  ),
+  dafb_scope_discrepancy = file.path(
+    audit_dir,
+    "10_pefc_dafb_scope_discrepancy.csv"
+  ),
   comparison_qc = file.path(audit_dir, "09_comparison_qc.csv"),
   pefc_qc = file.path(audit_dir, "10_pefc_qc.csv"),
   current_issues = file.path(
@@ -49,7 +61,8 @@ input_paths <- c(
     intermediate_dir,
     "07_proposed_model_issues.csv"
   ),
-  comparison_crosswalk = model_comparison_crosswalk_path
+  comparison_crosswalk = model_comparison_crosswalk_path,
+  lea_crosswalk = lea_crosswalk_path
 )
 
 check_required_files(input_paths)
@@ -82,6 +95,18 @@ charter_buildings <- read_csv(
   input_paths[["charter_buildings"]],
   show_col_types = FALSE
 )
+outside_formula <- read_csv(
+  input_paths[["outside_formula"]],
+  show_col_types = FALSE
+)
+district_cafeteria <- read_csv(
+  input_paths[["district_cafeteria"]],
+  show_col_types = FALSE
+)
+dafb_scope_discrepancy <- read_csv(
+  input_paths[["dafb_scope_discrepancy"]],
+  show_col_types = FALSE
+)
 comparison_qc <- read_csv(
   input_paths[["comparison_qc"]],
   show_col_types = FALSE
@@ -102,6 +127,19 @@ comparison_crosswalk <- read_csv(
   input_paths[["comparison_crosswalk"]],
   show_col_types = FALSE
 )
+lea_crosswalk <- read_csv(
+  input_paths[["lea_crosswalk"]],
+  show_col_types = FALSE
+) |>
+  mutate(
+    DistrictCode = as.integer(DistrictCode),
+    IncludeInStatewide = as.logical(IncludeInStatewide)
+  )
+
+expected_primary_district_count <- lea_crosswalk |>
+  filter(LEAType == "District", IncludeInStatewide) |>
+  distinct(DistrictCode) |>
+  nrow()
 
 final_paths <- c(
   staffing_statewide = file.path(
@@ -131,6 +169,18 @@ final_paths <- c(
   charter_buildings = file.path(
     final_dir,
     "11_charter_building_treatment.csv"
+  ),
+  outside_formula = file.path(
+    final_dir,
+    "11_current_outside_formula_components.csv"
+  ),
+  district_cafeteria = file.path(
+    final_dir,
+    "11_current_district_cafeteria_allocation.csv"
+  ),
+  dafb_scope_discrepancy = file.path(
+    final_dir,
+    "11_pefc_dafb_scope_discrepancy.csv"
   ),
   open_items = file.path(
     final_dir,
@@ -190,8 +240,8 @@ crosswalk_items <- comparison_crosswalk |>
     Notes = coalesce(Notes, ""),
     HasOpenItem =
       OutstandingQuestion != "" |
-      MappingStatus != "Confirmed" |
-      QuantityStatus != "Confirmed" |
+      !MappingStatus %in% c("Confirmed", "Not applicable") |
+      !QuantityStatus %in% c("Confirmed", "Not required", "Not applicable") |
       !RateStatus %in% c("Confirmed", "Not applicable")
   ) |>
   filter(HasOpenItem) |>
@@ -211,6 +261,7 @@ crosswalk_items <- comparison_crosswalk |>
     .groups = "drop"
   ) |>
   mutate(
+    RecordSource = "Comparison crosswalk",
     RecordType = "Open item",
     Status = case_when(
       QuantityStatus == "Missing" | RateStatus == "Missing" ~ "Missing",
@@ -238,6 +289,7 @@ crosswalk_items <- comparison_crosswalk |>
     )
   ) |>
   transmute(
+    RecordSource,
     AnalysisSection,
     RecordType,
     Status,
@@ -252,12 +304,15 @@ crosswalk_items <- comparison_crosswalk |>
   )
 
 current_issue_records <- current_issues |>
+  filter(Component != "Dover Air Force Base") |>
   mutate(
     RecordType = case_when(
       Priority %in% c(
         "Confirmed Unit Count source rule",
         "Documented assumption",
-        "Source limitation"
+        "Source limitation",
+        "Confirmed scope decision",
+        "Outside formula"
       ) ~ "Assumption or implementation choice",
       TRUE ~ "Open item"
     ),
@@ -265,11 +320,16 @@ current_issue_records <- current_issues |>
       Priority == "Needs data" ~ "Missing",
       Priority %in% c("Needs review", "Policy question") ~ "Provisional",
       Priority == "Not modeled" ~ "Missing",
-      Priority == "Confirmed Unit Count source rule" ~ "Confirmed",
+      Priority %in% c(
+        "Confirmed Unit Count source rule",
+        "Confirmed scope decision",
+        "Outside formula"
+      ) ~ "Confirmed",
       TRUE ~ "Documented"
     )
   ) |>
   transmute(
+    RecordSource = "Current model issues",
     AnalysisSection = "Current staffing rules",
     RecordType,
     Status,
@@ -288,6 +348,7 @@ current_issue_records <- current_issues |>
   )
 
 proposed_issue_records <- proposed_issues |>
+  filter(Component != "Dover Air Force Base") |>
   mutate(
     RecordType = case_when(
       Priority %in% c(
@@ -297,6 +358,7 @@ proposed_issue_records <- proposed_issues |>
         "Confirmed policy",
         "Externally provided implementation guidance",
         "Documented assumption",
+        "Confirmed scope decision",
         "Documented implementation choice",
         "Documented interpretation",
         "Calculator-reproduced rule",
@@ -305,14 +367,19 @@ proposed_issue_records <- proposed_issues |>
       TRUE ~ "Open item"
     ),
     Status = case_when(
-      Priority == "Confirmed policy" ~ "Confirmed",
-      Priority == "Externally provided implementation guidance" ~ "Confirmed",
+      Priority == "Needs data" ~ "Missing",
+      Priority %in% c(
+        "Confirmed policy",
+        "Externally provided implementation guidance",
+        "Confirmed scope decision"
+      ) ~ "Confirmed",
       Priority == "Difference from calculator" ~ "Documented difference",
       Priority == "Documented implementation choice" ~ "Provisional",
       TRUE ~ "Documented"
     )
   ) |>
   transmute(
+    RecordSource = "Proposed model issues",
     AnalysisSection = "Proposed staffing rules and PEFC reconciliation",
     RecordType,
     Status,
@@ -331,30 +398,106 @@ proposed_issue_records <- proposed_issues |>
   )
 
 scope_record <- tibble(
+  RecordSource = "Scope decision",
   AnalysisSection = "Scope",
-  RecordType = "Open item",
-  Status = "Pending confirmation",
-  Priority = "Needs review",
+  RecordType = "Assumption or implementation choice",
+  Status = "Confirmed",
+  Priority = "Confirmed scope decision",
   ComparisonCategory = "DAFB",
   SourceModel = "Both comparisons",
   SourceComponents = "DAFB treatment",
-  Issue = paste(
-    "Confirm whether the current model treats DAFB like the PEFC workbook",
-    "and whether DAFB belongs in the final statewide comparison."
+  Issue = dafb_scope_decision,
+  CurrentTreatment = paste(
+    "DAFB is excluded from aligned Base, Central Office, Opportunity,",
+    "Operational, and total modeled funding. Source rows are retained only",
+    "where needed to audit the PEFC workbook discrepancy."
   ),
-  CurrentTreatment =
-    "DAFB is excluded from the primary comparison pending confirmation.",
-  Action = "Update the scope rule in 00_settings.R when confirmed.",
-  Notes = primary_reporting_scope_short
+  Action = "No further action is required unless the confirmed funding treatment changes.",
+  Notes = pefc_dafb_scope_discrepancy_note
 )
 
-open_items_and_assumptions <- bind_rows(
+first_nonblank <- function(x) {
+  values <- as.character(x)
+  values <- values[!is.na(values) & trimws(values) != ""]
+  if (length(values) == 0) "" else values[[1]]
+}
+
+collapse_unique_nonblank <- function(x) {
+  values <- as.character(x)
+  values <- unique(values[!is.na(values) & trimws(values) != ""])
+  paste(values, collapse = " | ")
+}
+
+raw_open_items_and_assumptions <- bind_rows(
   crosswalk_items,
   current_issue_records,
   proposed_issue_records,
   scope_record
 ) |>
-  distinct() |>
+  distinct()
+
+generic_issue_text <- c(
+  "Required input is missing.",
+  "Required rate is missing.",
+  "Required input or rate is missing."
+)
+
+consolidated_open_items <- raw_open_items_and_assumptions |>
+  filter(RecordType == "Open item") |>
+  mutate(
+    SourceRank = case_when(
+      RecordSource == "Current model issues" ~ 1L,
+      RecordSource == "Proposed model issues" ~ 1L,
+      RecordSource == "Comparison crosswalk" ~ 2L,
+      TRUE ~ 9L
+    ),
+    IssueRank = if_else(
+      is.na(Issue) | trimws(Issue) == "" | Issue %in% generic_issue_text,
+      2L,
+      1L
+    )
+  ) |>
+  group_by(ComparisonCategory, SourceModel) |>
+  summarise(
+    AnalysisSection = first_nonblank(AnalysisSection[order(SourceRank)]),
+    RecordType = "Open item",
+    Status = case_when(
+      any(Status == "Missing") ~ "Missing",
+      any(Status == "Provisional") ~ "Provisional",
+      any(Status == "Pending confirmation") ~ "Pending confirmation",
+      TRUE ~ first_nonblank(Status)
+    ),
+    Priority = first_nonblank(Priority[order(SourceRank)]),
+    SourceComponents = collapse_unique_nonblank(SourceComponents),
+    Issue = first_nonblank(Issue[order(IssueRank, SourceRank)]),
+    CurrentTreatment = first_nonblank(CurrentTreatment[order(SourceRank)]),
+    Action = first_nonblank(Action[order(SourceRank)]),
+    Notes = collapse_unique_nonblank(Notes),
+    .groups = "drop"
+  ) |>
+  select(
+    AnalysisSection,
+    RecordType,
+    Status,
+    Priority,
+    ComparisonCategory,
+    SourceModel,
+    SourceComponents,
+    Issue,
+    CurrentTreatment,
+    Action,
+    Notes
+  )
+
+assumption_and_choice_records <- raw_open_items_and_assumptions |>
+  filter(RecordType != "Open item") |>
+  select(-RecordSource) |>
+  distinct()
+
+open_items_and_assumptions <- bind_rows(
+  consolidated_open_items,
+  assumption_and_choice_records
+) |>
   arrange(
     factor(RecordType, levels = c("Open item", "Assumption or implementation choice")),
     AnalysisSection,
@@ -366,17 +509,133 @@ open_items_and_assumptions <- bind_rows(
 
 # TECHNICAL QC AND ANALYSIS READINESS -------------------------------------------
 
+outside_formula_component_count <- outside_formula |>
+  filter(Component %in% outside_formula_current_components) |>
+  distinct(Component) |>
+  nrow()
+
+outside_formula_comparison_categories <- comparison_crosswalk |>
+  filter(ComparisonGroup == "Outside formula") |>
+  distinct(ComparisonCategory) |>
+  pull(ComparisonCategory)
+
+outside_formula_open_item_count <- open_items_and_assumptions |>
+  filter(
+    ComparisonCategory %in% c(
+      outside_formula_current_components,
+      outside_formula_comparison_categories,
+      "Custodians and cafeteria support"
+    ),
+    RecordType == "Open item" |
+      Status %in% c("Missing", "Provisional", "Pending confirmation")
+  ) |>
+  nrow()
+
+duplicate_open_item_key_count <- open_items_and_assumptions |>
+  filter(RecordType == "Open item") |>
+  count(ComparisonCategory, SourceModel, name = "RecordCount") |>
+  filter(RecordCount > 1L) |>
+  nrow()
+
+cafeteria_district_count <- district_cafeteria |>
+  distinct(DistrictCode) |>
+  nrow()
+
+cafeteria_state_allocation <- district_cafeteria |>
+  summarise(Value = sum(TotalStateAllocation, na.rm = TRUE)) |>
+  pull(Value)
+
+cafeteria_outside_formula_total <- outside_formula |>
+  filter(Component == "District Cafeteria Salary Allocation") |>
+  summarise(Value = sum(FundingAmount, na.rm = TRUE)) |>
+  pull(Value)
+
+dafb_discrepant_sections <- dafb_scope_discrepancy |>
+  filter(
+    WorkbookScopeStatus == "Confirmed PEFC workbook scope discrepancy"
+  ) |>
+  nrow()
+
+dafb_correct_sections <- dafb_scope_discrepancy |>
+  filter(
+    WorkbookScopeStatus == "PEFC workbook already excludes DAFB"
+  ) |>
+  nrow()
+
+final_packaging_qc <- tibble(
+  CheckType = "Integrity",
+  Check = c(
+    "All outside-formula current components are preserved in the final audit source",
+    "Outside-formula components do not remain as unresolved final open items",
+    "Final open items are unique by comparison category and source model",
+    "FY26 district cafeteria allocation contains all primary-scope districts",
+    "District cafeteria allocation reconciles to the outside-formula audit output",
+    "DAFB workbook scope discrepancy is classified across all four funding sections"
+  ),
+  Expected = c(
+    as.character(length(outside_formula_current_components)),
+    "0",
+    "0 duplicate open-item keys",
+    as.character(expected_primary_district_count),
+    as.character(cafeteria_state_allocation),
+    "3 discrepant sections and 1 correctly excluded section"
+  ),
+  Actual = c(
+    as.character(outside_formula_component_count),
+    as.character(outside_formula_open_item_count),
+    paste0(duplicate_open_item_key_count, " duplicate open-item keys"),
+    as.character(cafeteria_district_count),
+    as.character(cafeteria_outside_formula_total),
+    paste0(
+      dafb_discrepant_sections,
+      " discrepant sections and ",
+      dafb_correct_sections,
+      " correctly excluded section"
+    )
+  ),
+  Pass = c(
+    outside_formula_component_count ==
+      length(outside_formula_current_components),
+    outside_formula_open_item_count == 0,
+    duplicate_open_item_key_count == 0L,
+    cafeteria_district_count == expected_primary_district_count,
+    isTRUE(all.equal(
+      cafeteria_outside_formula_total,
+      cafeteria_state_allocation,
+      tolerance = comparison_tolerance
+    )),
+    dafb_discrepant_sections == 3L & dafb_correct_sections == 1L
+  )
+)
+
 final_qc <- bind_rows(
   comparison_qc |>
     mutate(CheckStage = "Step 09 current-versus-proposed", .before = 1),
   pefc_qc |>
-    mutate(CheckStage = "Step 10 PEFC reconciliation", .before = 1)
+    mutate(CheckStage = "Step 10 PEFC reconciliation", .before = 1),
+  final_packaging_qc |>
+    mutate(CheckStage = "Step 11 final packaging", .before = 1)
 )
 
-open_item_count <- open_items_and_assumptions |>
+unique_open_item_count <- open_items_and_assumptions |>
+  filter(RecordType == "Open item") |>
+  nrow()
+
+provisional_implementation_choice_count <- open_items_and_assumptions |>
   filter(
-    RecordType == "Open item" |
-      Status %in% c("Missing", "Provisional", "Pending confirmation")
+    RecordType == "Assumption or implementation choice",
+    Status == "Provisional"
+  ) |>
+  nrow()
+
+staffing_provisional_choice_count <- open_items_and_assumptions |>
+  filter(
+    RecordType == "Assumption or implementation choice",
+    Status == "Provisional",
+    AnalysisSection %in% c(
+      "Current staffing rules",
+      "Proposed staffing rules and PEFC reconciliation"
+    )
   ) |>
   nrow()
 
@@ -385,6 +644,8 @@ final_readiness <- tibble(
     "Working staffing comparison",
     "Confirmed staffing subtotal",
     "Opportunity and Operational comparison",
+    "Outside-formula current funding documentation",
+    "DAFB scope decision",
     "PEFC workbook reconciliation",
     "Outstanding decisions and inputs"
   ),
@@ -400,22 +661,55 @@ final_readiness <- tibble(
       "Complete",
       "Not yet estimable"
     ),
+    if_else(
+      outside_formula_component_count ==
+        length(outside_formula_current_components) &
+        cafeteria_district_count == expected_primary_district_count,
+      "Complete and excluded from position-based totals",
+      "Incomplete documentation"
+    ),
+    if_else(
+      dafb_discrepant_sections == 3L & dafb_correct_sections == 1L,
+      "Confirmed and documented",
+      "Review required"
+    ),
     "Complete for the current workbook and inputs",
-    if_else(open_item_count == 0, "Complete", "Outstanding items remain")
+    if_else(
+      unique_open_item_count == 0 &
+        provisional_implementation_choice_count == 0,
+      "Complete",
+      "Outstanding items remain"
+    )
   ),
   Ready = c(
     TRUE,
     all(as.logical(staffing_statewide$IsCompleteForFinalComparison)),
     all(as.logical(weighted_statewide$IsCompleteForFinalComparison)),
+    outside_formula_component_count ==
+      length(outside_formula_current_components) &
+      cafeteria_district_count == expected_primary_district_count,
+    dafb_discrepant_sections == 3L & dafb_correct_sections == 1L,
     all(as.logical(pefc_qc$Pass)),
-    open_item_count == 0
+    unique_open_item_count == 0 &
+      provisional_implementation_choice_count == 0
   ),
   OpenItemCount = c(
     sum(staffing_components$ComparisonStatus != "Confirmed"),
     sum(staffing_components$ComparisonStatus == "Provisional"),
     sum(weighted_statewide$ComparisonStatus != "Confirmed"),
+    outside_formula_open_item_count,
     0L,
-    open_item_count
+    0L,
+    unique_open_item_count
+  ),
+  ProvisionalImplementationChoiceCount = c(
+    staffing_provisional_choice_count,
+    staffing_provisional_choice_count,
+    0L,
+    0L,
+    0L,
+    0L,
+    provisional_implementation_choice_count
   ),
   Notes = c(
     paste(
@@ -424,17 +718,33 @@ final_readiness <- tibble(
     ),
     paste(
       "Confirmed subtotals include only categories with confirmed mappings,",
-      "quantities, and rates."
+      "quantities, and rates. Administrative Support Professionals and",
+      "Instructional Supports use externally confirmed functional crosswalks."
     ),
     paste(
       "Proposed allocations are available; current analogues and complete",
       "LEA allocations are still needed."
     ),
     paste(
-      "Review the final PEFC summary, detailed audit files, and the charter",
-      "building treatment table."
+      "Custodians, Cafeteria Managers, and Cafeteria Workers are retained in",
+      "11_current_outside_formula_components.csv. The FY26 district cafeteria",
+      "salary allocation is retained separately and is not added to staffing totals."
     ),
-    "See 11_open_items_and_assumptions.csv."
+    paste(
+      "DAFB does not receive state funding. It is excluded from all aligned",
+      "IV&V totals and retained only for PEFC workbook scope auditing."
+    ),
+    paste(
+      "Review the final PEFC summary, detailed audit files, the DAFB scope",
+      "discrepancy output, and the charter building treatment table."
+    ),
+    paste0(
+      "See 11_open_items_and_assumptions.csv. Unique open items: ",
+      unique_open_item_count,
+      "; provisional implementation choices: ",
+      provisional_implementation_choice_count,
+      "."
+    )
   )
 )
 
@@ -451,6 +761,12 @@ write_review_csv(
   final_paths[["pefc_reconciliation"]]
 )
 write_review_csv(charter_buildings, final_paths[["charter_buildings"]])
+write_review_csv(outside_formula, final_paths[["outside_formula"]])
+write_review_csv(district_cafeteria, final_paths[["district_cafeteria"]])
+write_review_csv(
+  dafb_scope_discrepancy,
+  final_paths[["dafb_scope_discrepancy"]]
+)
 write_review_csv(
   open_items_and_assumptions,
   final_paths[["open_items"]]
@@ -466,4 +782,4 @@ if (nrow(integrity_failures) > 0) {
   stop("Final output integrity checks failed.", call. = FALSE)
 }
 
-message("Step 11 complete: ten report-ready files created in data/output/final/.")
+message("Step 11 complete: ", length(final_paths), " report-ready files created in data/output/final/.")

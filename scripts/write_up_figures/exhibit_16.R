@@ -30,6 +30,13 @@
 #   instructional_support_pinpoint
 #   instructional_support_summary
 #
+# Reporting basis:
+#   This is a PEFC-workbook reconciliation exhibit, so the three displayed
+#   differences use the workbook scope as presented. DAFB is retained only
+#   for source audit where the workbook includes it; DAFB is excluded from
+#   every aligned IV&V funding comparison because it does not receive state
+#   funding.
+#
 # Difference convention:
 #   IV&V minus PEFC
 #   Positive = IV&V is higher
@@ -41,6 +48,9 @@ library(readr)
 library(readxl)
 library(stringr)
 library(tibble)
+
+# Assumes the working directory is the project root.
+source(file.path("scripts", "00_settings.R"))
 
 # -----------------------------------------------------------------------------
 # 1. Helper functions
@@ -116,29 +126,34 @@ stop_if_missing_columns <- function(
 # -----------------------------------------------------------------------------
 
 component_comparison_path <- file.path(
-  "data",
-  "output",
-  "audit",
+  audit_dir,
   "10_pefc_component_comparison.csv"
 )
 
 proposed_quantities_path <- file.path(
-  "data",
-  "output",
-  "intermediate",
+  intermediate_dir,
   "07_proposed_model_quantities.csv"
 )
 
-calculator_path <- file.path(
-  "data",
-  "input",
-  "Copy of Calculator for 25-26 w Charter (003).xlsm"
+dafb_scope_discrepancy_path <- file.path(
+  audit_dir,
+  "10_pefc_dafb_scope_discrepancy.csv"
 )
 
-lea_crosswalk_path <- file.path(
-  "data",
-  "input",
-  "lea_crosswalk.csv"
+staffing_component_path <- file.path(
+  final_dir,
+  "11_staffing_component_comparison.csv"
+)
+
+check_required_files(
+  c(
+    component_comparison_path,
+    proposed_quantities_path,
+    dafb_scope_discrepancy_path,
+    staffing_component_path,
+    calculator_path,
+    lea_crosswalk_path
+  )
 )
 
 # -----------------------------------------------------------------------------
@@ -188,6 +203,16 @@ lea_crosswalk <- read_csv(
     CalculatorKey =
       normalize_key(CalculatorLEAName)
   )
+
+dafb_scope_discrepancy <- read_csv(
+  dafb_scope_discrepancy_path,
+  show_col_types = FALSE
+)
+
+staffing_component_comparison <- read_csv(
+  staffing_component_path,
+  show_col_types = FALSE
+)
 
 calculator_summary <- read_excel(
   calculator_path,
@@ -257,6 +282,27 @@ stop_if_missing_columns(
 )
 
 stop_if_missing_columns(
+  dafb_scope_discrepancy,
+  c(
+    "DistrictCode",
+    "FundingMetric",
+    "WorkbookSectionTreatment",
+    "WorkbookScopeStatus"
+  ),
+  "10_pefc_dafb_scope_discrepancy.csv"
+)
+
+stop_if_missing_columns(
+  staffing_component_comparison,
+  c(
+    "ComparisonCategory",
+    "ComparisonStatus",
+    "IsCompleteForFinalComparison"
+  ),
+  "11_staffing_component_comparison.csv"
+)
+
+stop_if_missing_columns(
   calculator_summary,
   c(
     "District",
@@ -298,7 +344,7 @@ exhibit16_raw <- pefc_component_comparison |>
   filter(
     ComparisonType ==
       "Component formula/input comparison",
-    
+    ReportingScope == pefc_as_presented_scope_label,
     Component %in%
       selected_components
   ) |>
@@ -419,6 +465,32 @@ exhibit16 <- exhibit16_raw |>
     `Observed difference`,
     `Practical explanation`
   )
+
+instructional_support_current_status <-
+  staffing_component_comparison |>
+  filter(
+    ComparisonCategory == "Instructional Supports"
+  ) |>
+  distinct(
+    ComparisonStatus,
+    IsCompleteForFinalComparison
+  )
+
+exhibit16_context <- tibble(
+  ReportingBasis = pefc_as_presented_scope_label,
+  AlignedIVVScope = primary_reporting_scope_short,
+  DAFBTreatment = dafb_scope_decision,
+  SelectedComponents = length(selected_components),
+  InstructionalSupportsCurrentCrosswalkStatus =
+    instructional_support_current_status$ComparisonStatus,
+  InstructionalSupportsCurrentComparisonComplete =
+    instructional_support_current_status$IsCompleteForFinalComparison,
+  Note = paste(
+    "The displayed PEFC-versus-IV&V differences diagnose workbook implementation",
+    "rather than comparing the current and proposed funding models. DAFB is retained",
+    "only where needed to reproduce and audit the workbook as presented."
+  )
+)
 
 # -----------------------------------------------------------------------------
 # 7. Pull rows used for validation
@@ -736,10 +808,16 @@ instructional_support_lea_comparison <-
     )
   ) |>
   mutate(
-    ReportingScope = if_else(
-      IncludeInStatewide,
-      "Primary 43-LEA scope",
-      "Outside primary scope"
+    IsDAFBAuditRow =
+      DistrictCode == dafb_district_code,
+    
+    ReportingScope = case_when(
+      IncludeInStatewide ~
+        primary_reporting_scope_short,
+      IsDAFBAuditRow ~
+        "PEFC source audit only: DAFB excluded from aligned IV&V scope",
+      TRUE ~
+        "Outside aligned IV&V scope"
     ),
     
     `Instructional Support difference` =
@@ -873,16 +951,13 @@ workbook_charter_rows <- calculator_data |>
     
     # Use the explicitly named organization row when present.
     # Otherwise, use the final row in a multi-row charter block.
-    IsOrganizationTotal = case_when(
-      any(NameMatchesOrganization) ~
-        NameMatchesOrganization,
-      
-      n() > 1 ~
-        row_number() == n(),
-      
-      TRUE ~
-        FALSE
-    )
+    IsOrganizationTotal = if (any(NameMatchesOrganization)) {
+      NameMatchesOrganization
+    } else if (n() > 1) {
+      row_number() == n()
+    } else {
+      rep(FALSE, n())
+    }
   ) |>
   ungroup()
 
@@ -1368,6 +1443,29 @@ instructional_support_reconciliation <- tibble(
       `Reconstructed statewide difference`
   )
 
+instructional_support_aligned_reconciliation <-
+  instructional_support_lea_comparison |>
+  filter(
+    IncludeInStatewide
+  ) |>
+  summarise(
+    ReportingScope = primary_reporting_scope_short,
+    `PEFC Instructional Supports` =
+      sum(`PEFC Instructional Supports`),
+    `IV&V Instructional Supports` =
+      sum(`IV&V Instructional Supports`),
+    `Instructional Support difference` =
+      sum(`Instructional Support difference`),
+    `Funding difference` =
+      sum(`Funding difference`)
+  )
+
+instructional_support_dafb_audit_row <-
+  instructional_support_lea_comparison |>
+  filter(
+    IsDAFBAuditRow
+  )
+
 # Compatibility aliases for the earlier object names
 instructional_support_pinpoint <-
   instructional_support_affected_leas
@@ -1394,7 +1492,38 @@ stopifnot(
       IncludeInStatewide
   ) == 43,
   
-  # Statewide values reconcile to Exhibit 16
+  sum(
+    instructional_support_lea_comparison$
+      IsDAFBAuditRow
+  ) == 1,
+  
+  all(
+    instructional_support_lea_comparison$
+      IncludeInStatewide |
+      instructional_support_lea_comparison$
+        IsDAFBAuditRow
+  ),
+  
+  nrow(instructional_support_current_status) == 1,
+  instructional_support_current_status$ComparisonStatus == "Confirmed",
+  instructional_support_current_status$IsCompleteForFinalComparison,
+  
+  nrow(dafb_scope_discrepancy) == 4,
+  sum(
+    dafb_scope_discrepancy$WorkbookScopeStatus ==
+      "Confirmed PEFC workbook scope discrepancy"
+  ) == 3,
+  sum(
+    dafb_scope_discrepancy$WorkbookScopeStatus ==
+      "PEFC workbook already excludes DAFB"
+  ) == 1,
+  
+  all(
+    exhibit16_raw$ReportingScope ==
+      pefc_as_presented_scope_label
+  ),
+  
+  # Workbook-as-presented values reconcile to Exhibit 16
   near(
     sum(
       instructional_support_lea_comparison$
@@ -1539,8 +1668,8 @@ stopifnot(
 
 message(
   paste(
-    "Instructional Supports comparison validated:",
-    "44 workbook-scope LEAs,",
+    "Instructional Supports workbook reconciliation validated:",
+    "43 aligned LEAs plus one DAFB source-audit row,",
     "48 charter calculation units,",
     "7 affected charter LEAs,",
     "10 affected building rows,",
@@ -1562,26 +1691,19 @@ instructional_support_charter_building_comparison
 instructional_support_affected_buildings
 instructional_support_affected_leas
 instructional_support_reconciliation
+instructional_support_aligned_reconciliation
+instructional_support_dafb_audit_row
+exhibit16_context
 
-View(exhibit16_raw)
-View(exhibit16)
-
-View(
-  instructional_support_lea_comparison
-)
-
-View(
-  instructional_support_charter_building_comparison
-)
-
-View(
-  instructional_support_affected_buildings
-)
-
-View(
-  instructional_support_affected_leas
-)
-
-View(
-  instructional_support_reconciliation
-)
+if (interactive()) {
+  View(exhibit16_raw)
+  View(exhibit16)
+  View(instructional_support_lea_comparison)
+  View(instructional_support_charter_building_comparison)
+  View(instructional_support_affected_buildings)
+  View(instructional_support_affected_leas)
+  View(instructional_support_reconciliation)
+  View(instructional_support_aligned_reconciliation)
+  View(instructional_support_dafb_audit_row)
+  View(exhibit16_context)
+}

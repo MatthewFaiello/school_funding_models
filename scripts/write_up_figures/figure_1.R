@@ -33,14 +33,16 @@ staffing_plot_data <- staffing_components |>
       ProposedKnownFundingAmount - CurrentKnownFundingAmount
     ) / 1e6,
     
-    category_label = case_when(
+    category_display = case_when(
       ComparisonCategory == "Administrative Support Professionals" ~
-        "Administrative Support*",
-      ComparisonCategory == "Food Services Supervisor" ~
-        "Food Services Supervisor*",
-      ComparisonCategory == "Instructional Supports" ~
-        "Instructional Supports*",
+        "Administrative Support",
       TRUE ~ ComparisonCategory
+    ),
+
+    category_label = if_else(
+      ComparisonStatus == "Confirmed",
+      category_display,
+      paste0(category_display, "*")
     ),
     
     value_label = paste0(
@@ -52,6 +54,12 @@ staffing_plot_data <- staffing_components |>
   mutate(
     category_label = factor(category_label, levels = category_label)
   )
+
+figure_caption <- if (any(staffing_plot_data$ComparisonStatus != "Confirmed")) {
+  "*Provisional comparison category"
+} else {
+  NULL
+}
 
 # Optional audit view
 staffing_plot_data |>
@@ -97,7 +105,7 @@ largest_staffing_differences_plot <- ggplot(
     title = NULL, #"Largest working staffing differences by category\n",
     x = NULL,
     y = "\nIV&V proposed minus recreated current funding ($ millions)",
-    caption = "*Provisional comparison category"
+    caption = figure_caption
   ) +
   theme_minimal(base_size = 11) +
   theme(

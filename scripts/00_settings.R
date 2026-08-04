@@ -57,15 +57,30 @@ pefc_model_label <- "PEFC Workbook as Presented"
 primary_reporting_excluded_lea_codes <- c(dafb_district_code)
 primary_reporting_scope_label <- paste(
   "Primary comparable-model scope:",
-  "includes BASSE and excludes DAFB pending confirmation"
+  "includes BASSE and excludes DAFB because DAFB does not receive state funding"
 )
 primary_reporting_scope_short <-
-  "Includes BASSE; excludes DAFB pending confirmation"
+  "Includes BASSE; excludes DAFB"
+
+dafb_scope_decision <-
+  "DAFB is excluded from modeled state funding because it does not receive state funding."
 
 pefc_as_presented_scope_label <- paste(
   "PEFC workbook scope as presented:",
   "includes BASSE and includes DAFB in Base, Opportunity, and Operational",
   "but not Central Office Funding"
+)
+pefc_dafb_scope_discrepancy_note <- paste(
+  "The PEFC workbook includes DAFB in Base, Opportunity, and Operational Funding,",
+  "although DAFB does not receive state funding; aligned IV&V comparisons exclude DAFB."
+)
+
+# These current-model categories are retained for documentation but are not part
+# of the apples-to-apples position-based formula comparison.
+outside_formula_current_components <- c(
+  "Custodians",
+  "Cafeteria Manager",
+  "Cafeteria Worker"
 )
 
 comparison_tolerance <- 0.01
@@ -144,6 +159,10 @@ current_school_supplement_path <- file.path(
 current_lea_supplement_path <- file.path(
   input_dir,
   "current_lea_supplement.csv"
+)
+current_district_cafeteria_allocation_path <- file.path(
+  input_dir,
+  "current_district_cafeteria_allocation.csv"
 )
 proposed_manual_allocations_path <- file.path(
   input_dir,

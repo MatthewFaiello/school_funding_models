@@ -11,6 +11,11 @@ proposed_detail <- read_csv(
   show_col_types = FALSE
 )
 
+weighted_lea_comparison <- read_csv(
+  "data/output/final/11_opportunity_operational_lea_comparison.csv",
+  show_col_types = FALSE
+)
+
 # -----------------------------------------------------------------------------
 # Component order, labels, and colors
 # -----------------------------------------------------------------------------
@@ -282,6 +287,19 @@ charter_plot_data <- charter_plot_data |>
 # Validation
 # -----------------------------------------------------------------------------
 
+expected_charter_total <- weighted_lea_comparison |>
+  filter(
+    LEAType == "Charter",
+    FundingCategory %in% c(
+      "Opportunity Funding",
+      "Operational Funding"
+    )
+  ) |>
+  summarise(
+    ProposedFundingAmount = sum(ProposedFundingAmount, na.rm = TRUE)
+  ) |>
+  pull(ProposedFundingAmount)
+
 charter_reconciliation <- charter_plot_data |>
   summarise(
     ComponentTotal = sum(FundingAmount),
@@ -304,9 +322,11 @@ stopifnot(
   
   n_distinct(charter_plot_data$ComponentLabel) == 9,
   
+  !any(charter_plot_data$DistrictCode == 14L),
+  
   abs(
     sum(charter_plot_data$FundingAmount) -
-      50063905
+      expected_charter_total
   ) < 0.05,
   
   all(
@@ -377,7 +397,15 @@ figure4 <- ggplot(
   labs(
     x = "\nProposed Opportunity and Operational Funding",
     y = NULL,
-    fill = NULL
+    fill = NULL,
+    caption = stringr::str_wrap(
+      paste(
+        "Charter allocations under the independently reproduced proposed model.",
+        "Districts are not displayed, DAFB is excluded, and current funding analogues",
+        "remain pending confirmation from OMB and CGO."
+      ),
+      width = 150
+    )
   ) +
   coord_cartesian(
     clip = "off"
@@ -424,6 +452,12 @@ figure4 <- ggplot(
     legend.spacing.x = grid::unit(0.08, "cm"),
     legend.margin = margin(t = 2),
     
+    plot.caption = element_text(
+      size = 6.7,
+      color = "#595959",
+      hjust = 0,
+      margin = margin(t = 7)
+    ),
     plot.margin = margin(
       t = 5,
       r = 30,

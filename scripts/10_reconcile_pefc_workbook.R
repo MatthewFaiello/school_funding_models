@@ -25,6 +25,10 @@ pefc_reconciliation_path <- file.path(
   "10_pefc_reconciliation_summary.csv"
 )
 pefc_qc_path <- file.path(audit_dir, "10_pefc_qc.csv")
+pefc_dafb_scope_path <- file.path(
+  audit_dir,
+  "10_pefc_dafb_scope_discrepancy.csv"
+)
 charter_building_path <- file.path(
   audit_dir,
   "10_charter_building_treatment.csv"
@@ -48,6 +52,7 @@ proposed_detail <- read_csv(proposed_detail_path, show_col_types = FALSE) |>
 lea_crosswalk <- read_csv(lea_crosswalk_path, show_col_types = FALSE) |>
   mutate(
     DistrictCode = as.integer(DistrictCode),
+    IncludeInStatewide = as.logical(IncludeInStatewide),
     CalculatorKey = normalize_name(CalculatorLEAName)
   )
 
@@ -161,13 +166,20 @@ pefc_lea <- summary_raw |>
   ) |>
   left_join(
     lea_crosswalk |>
-      select(DistrictCode, DistrictName, LEAType, CalculatorKey),
+      select(
+        DistrictCode,
+        DistrictName,
+        LEAType,
+        IncludeInStatewide,
+        CalculatorKey
+      ),
     by = "CalculatorKey"
   ) |>
   select(
     DistrictCode,
     DistrictName,
     LEAType,
+    IncludeInStatewide,
     CalculatorLEAName,
     CalculatorTotalRow,
     starts_with("PEFC")
@@ -181,6 +193,35 @@ stop_if_rows(
   unmatched_pefc_leas,
   "One or more PEFC Summary LEA rows did not match lea_crosswalk.csv."
 )
+
+# DAFB is retained below only to audit the PEFC workbook as presented. The
+# aligned IV&V scope is controlled by IncludeInStatewide and must exclude DAFB.
+dafb_pefc_row <- pefc_lea |>
+  filter(DistrictCode == dafb_district_code)
+
+dafb_independent_rows <- proposed_detail |>
+  filter(DistrictCode == dafb_district_code)
+
+if (nrow(dafb_pefc_row) != 1L) {
+  stop(
+    "The PEFC Summary must contain exactly one DAFB LEA-total row for audit.",
+    call. = FALSE
+  )
+}
+
+if (nrow(dafb_independent_rows) == 0L) {
+  stop(
+    "The independent proposed detail is missing the DAFB source-audit rows.",
+    call. = FALSE
+  )
+}
+
+if (any(dafb_independent_rows$IncludeInStatewide %in% TRUE, na.rm = TRUE)) {
+  stop(
+    "DAFB is marked for inclusion in aligned IV&V totals.",
+    call. = FALSE
+  )
+}
 
 
 # CHARTER BUILDING TREATMENT ----------------------------------------------------
@@ -316,10 +357,11 @@ charter_building_treatment <- charter_units |>
   arrange(DistrictName, PEFCBuildingSequence)
 
 
-# INDEPENDENT REPRODUCTION ON THE PEFC AS-PRESENTED SCOPE ----------------------
+# SOURCE-AUDIT REPRODUCTION OF THE PEFC AS-PRESENTED SCOPE ---------------------
 
-# Base includes all organizations. Central Office excludes DAFB to match the
-# PEFC workbook's section-specific scope.
+# This section intentionally reproduces the workbook's inconsistent DAFB scope
+# solely for audit: Base, Opportunity, and Operational include DAFB, while
+# Central Office excludes it. These amounts are not valid aligned IV&V totals.
 independent_as_presented_position_components <- proposed_detail |>
   filter(
     FundingSection == "Base Funding (State Support)" |
@@ -507,6 +549,7 @@ pefc_lea_long <- pefc_lea |>
     DistrictCode,
     DistrictName,
     LEAType,
+    IncludeInStatewide,
     PEFCBaseFundingAmount,
     PEFCCentralOfficeFundingAmount,
     PEFCOpportunityFundingAmount,
@@ -526,6 +569,52 @@ pefc_lea_long <- pefc_lea |>
       "PEFCOperationalFundingAmount" = "Operational Funding"
     )
   )
+
+pefc_dafb_scope_discrepancy <- pefc_lea_long |>
+  filter(DistrictCode == dafb_district_code) |>
+  mutate(
+    WorkbookSectionTreatment = if_else(
+      abs(PEFCFundingAmount) > comparison_tolerance,
+      "Included in PEFC workbook funding",
+      "Excluded from PEFC workbook funding"
+    ),
+    CorrectAlignedIVVTreatment =
+      "Excluded because DAFB does not receive state funding",
+    WorkbookScopeStatus = case_when(
+      FundingMetric %in% c(
+        "Base Funding",
+        "Opportunity Funding",
+        "Operational Funding"
+      ) & abs(PEFCFundingAmount) > comparison_tolerance ~
+        "Confirmed PEFC workbook scope discrepancy",
+      FundingMetric == "Central Office Funding" &
+        abs(PEFCFundingAmount) <= comparison_tolerance ~
+        "PEFC workbook already excludes DAFB",
+      TRUE ~ "Unexpected PEFC workbook treatment; review required"
+    ),
+    ScopeDecision = dafb_scope_decision,
+    ScopeDiscrepancyNote = pefc_dafb_scope_discrepancy_note
+  ) |>
+  select(
+    DistrictCode,
+    DistrictName,
+    FundingMetric,
+    PEFCFundingAmount,
+    WorkbookSectionTreatment,
+    CorrectAlignedIVVTreatment,
+    WorkbookScopeStatus,
+    ScopeDecision,
+    ScopeDiscrepancyNote
+  ) |>
+  arrange(match(
+    FundingMetric,
+    c(
+      "Base Funding",
+      "Central Office Funding",
+      "Opportunity Funding",
+      "Operational Funding"
+    )
+  ))
 
 pefc_lea_as_presented_comparison <- pefc_lea_long |>
   left_join(
@@ -551,7 +640,10 @@ pefc_lea_as_presented_comparison <- pefc_lea_long |>
   )
 
 independent_primary_lea_long <- proposed_detail |>
-  filter(!DistrictCode %in% primary_reporting_excluded_lea_codes) |>
+  filter(
+    IncludeInStatewide %in% TRUE,
+    !DistrictCode %in% primary_reporting_excluded_lea_codes
+  ) |>
   mutate(
     FundingMetric = recode(
       FundingSection,
@@ -568,7 +660,10 @@ independent_primary_lea_long <- proposed_detail |>
   )
 
 pefc_primary_lea_comparison <- pefc_lea_long |>
-  filter(!DistrictCode %in% primary_reporting_excluded_lea_codes) |>
+  filter(
+    IncludeInStatewide %in% TRUE,
+    !DistrictCode %in% primary_reporting_excluded_lea_codes
+  ) |>
   left_join(
     independent_primary_lea_long,
     by = c("DistrictCode", "FundingMetric")
@@ -643,7 +738,10 @@ pefc_summary_state <- bind_rows(
 )
 
 pefc_primary_state <- pefc_lea_long |>
-  filter(!DistrictCode %in% primary_reporting_excluded_lea_codes) |>
+  filter(
+    IncludeInStatewide %in% TRUE,
+    !DistrictCode %in% primary_reporting_excluded_lea_codes
+  ) |>
   group_by(FundingMetric) |>
   summarise(
     PEFCPrimaryScopeAmount = sum(PEFCFundingAmount, na.rm = FALSE),
@@ -899,9 +997,7 @@ component_reconciliation <- pefc_component_comparison |>
   )
 
 pefc_section_scope_count <- nrow(pefc_lea)
-pefc_central_scope_count <- sum(
-  !pefc_lea$DistrictCode %in% primary_reporting_excluded_lea_codes
-)
+pefc_central_scope_count <- sum(pefc_lea$IncludeInStatewide %in% TRUE)
 primary_scope_pefc_count <- pefc_central_scope_count
 primary_scope_independent_count <- n_distinct(
   independent_primary_lea_long$DistrictCode
@@ -952,8 +1048,9 @@ pefc_reconciliation_summary <- bind_rows(
       DifferenceClassification == "Workbook statewide-summary discrepancy" ~
         "The PEFC Calculator statewide display does not equal the sum of PEFC Summary LEA rows.",
       DifferenceClassification == "Scope-treatment discrepancy" ~ paste(
-        "The PEFC workbook includes DAFB in Base, Opportunity, and",
-        "Operational Funding but excludes DAFB from Central Office Funding."
+        "Confirmed workbook scope discrepancy: the PEFC workbook includes",
+        "DAFB in Base, Opportunity, and Operational Funding even though DAFB",
+        "does not receive state funding; Central Office already excludes it."
       ),
       DifferenceClassification == "Scope alignment" ~
         "Both sources contain the same 43 LEAs in the maintained primary comparison scope.",
@@ -1004,6 +1101,9 @@ pefc_qc <- tibble(
     "All PEFC Summary LEAs matched the maintained LEA crosswalk",
     "PEFC Summary contains one row per maintained LEA",
     "BASSE appears in the PEFC Summary",
+    "DAFB is excluded from aligned independent IV&V totals",
+    "DAFB is excluded from the primary PEFC comparison scope",
+    "PEFC workbook DAFB treatment matches the documented scope discrepancy",
     "DAFB Central Office Funding is zero in the PEFC Summary",
     "PEFC Calculator total equals its section totals",
     "All PEFC calculator components matched the independent component list",
@@ -1020,6 +1120,9 @@ pefc_qc <- tibble(
     "0 unmatched",
     as.character(nrow(lea_crosswalk)),
     "TRUE",
+    "TRUE",
+    "TRUE",
+    "3 discrepant sections and 1 correctly excluded section",
     "0",
     as.character(calculator_section_total),
     "0 missing",
@@ -1036,6 +1139,25 @@ pefc_qc <- tibble(
     as.character(nrow(unmatched_pefc_leas)),
     as.character(nrow(pefc_lea)),
     as.character(basse_district_code %in% pefc_lea$DistrictCode),
+    as.character(!any(
+      dafb_independent_rows$IncludeInStatewide %in% TRUE,
+      na.rm = TRUE
+    )),
+    as.character(!any(
+      pefc_primary_lea_comparison$DistrictCode == dafb_district_code
+    )),
+    paste0(
+      sum(
+        pefc_dafb_scope_discrepancy$WorkbookScopeStatus ==
+          "Confirmed PEFC workbook scope discrepancy"
+      ),
+      " discrepant sections and ",
+      sum(
+        pefc_dafb_scope_discrepancy$WorkbookScopeStatus ==
+          "PEFC workbook already excludes DAFB"
+      ),
+      " correctly excluded section"
+    ),
     as.character(
       pefc_lea |>
         filter(DistrictCode == dafb_district_code) |>
@@ -1076,6 +1198,16 @@ pefc_qc <- tibble(
     nrow(unmatched_pefc_leas) == 0,
     nrow(pefc_lea) == nrow(lea_crosswalk),
     basse_district_code %in% pefc_lea$DistrictCode,
+    !any(dafb_independent_rows$IncludeInStatewide %in% TRUE, na.rm = TRUE),
+    !any(pefc_primary_lea_comparison$DistrictCode == dafb_district_code),
+    sum(
+      pefc_dafb_scope_discrepancy$WorkbookScopeStatus ==
+        "Confirmed PEFC workbook scope discrepancy"
+    ) == 3L &
+      sum(
+        pefc_dafb_scope_discrepancy$WorkbookScopeStatus ==
+          "PEFC workbook already excludes DAFB"
+      ) == 1L,
     abs(
       pefc_lea |>
         filter(DistrictCode == dafb_district_code) |>
@@ -1114,6 +1246,7 @@ write_review_csv(pefc_statewide_as_presented, pefc_state_path)
 write_review_csv(pefc_component_comparison, pefc_component_path)
 write_review_csv(pefc_lea_comparison, pefc_lea_path)
 write_review_csv(pefc_reconciliation_summary, pefc_reconciliation_path)
+write_review_csv(pefc_dafb_scope_discrepancy, pefc_dafb_scope_path)
 write_review_csv(charter_building_treatment, charter_building_path)
 write_review_csv(pefc_qc, pefc_qc_path)
 

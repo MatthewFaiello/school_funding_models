@@ -9,6 +9,10 @@
 #
 # Interpretation rule: when the proposed model does not explicitly change a
 # calculation detail, the corresponding current-model treatment is retained.
+#
+# DAFB source rows are retained only for source/workbook audit. DAFB does not
+# receive state funding, so IncludeInStatewide must remain FALSE and all aligned
+# IV&V summaries and issue counts exclude those rows.
 # =============================================================================
 
 source(file.path("scripts", "00_settings.R"))
@@ -114,6 +118,25 @@ lea_input <- read_csv(
     DistrictCode = as.integer(DistrictCode),
     IncludeInStatewide = as.logical(IncludeInStatewide)
   )
+
+# DAFB may remain in prepared source inputs for audit, but it must never enter
+# an aligned IV&V calculation or statewide total.
+dafb_scope_violations <- bind_rows(
+  school_input |>
+    filter(DistrictCode == dafb_district_code, IncludeInStatewide) |>
+    transmute(Input = "School calculation units", DistrictCode),
+  weighted_input |>
+    filter(DistrictCode == dafb_district_code, IncludeInStatewide) |>
+    transmute(Input = "Weighted funding input", DistrictCode),
+  lea_input |>
+    filter(DistrictCode == dafb_district_code, IncludeInStatewide) |>
+    transmute(Input = "LEA input", DistrictCode)
+)
+
+stop_if_rows(
+  dafb_scope_violations,
+  "DAFB is incorrectly marked for inclusion in aligned proposed-model calculations."
+)
 
 
 # PROPOSED-MODEL RULES ----------------------------------------------------------
@@ -838,11 +861,7 @@ central_components <- bind_rows(
     RawInputValue,
     AppliedFactor,
     FundingQuantity,
-    CalculationStatus = case_when(
-      DistrictCode == dafb_district_code ~
-        paste0(CalculationStatus, "; excluded from statewide totals"),
-      TRUE ~ CalculationStatus
-    ),
+    CalculationStatus,
     CalculationComplete = !is.na(FundingQuantity)
   )
 
@@ -855,7 +874,18 @@ proposed_model_quantities <- bind_rows(
   central_components
 ) |>
   left_join(proposed_model_rules, by = "Component") |>
-  mutate(Model = "Proposed model", .before = 1) |>
+  mutate(
+    Model = "Proposed model",
+    CalculationStatus = case_when(
+      DistrictCode == dafb_district_code ~ paste(
+        CalculationStatus,
+        "Source-audit calculation only; DAFB does not receive state funding",
+        "and is excluded from aligned IV&V totals."
+      ),
+      TRUE ~ CalculationStatus
+    ),
+    .before = 1
+  ) |>
   select(
     Model,
     CalculationLevel,
@@ -906,25 +936,35 @@ stop_if_rows(
 
 # SUMMARY AND ISSUES ------------------------------------------------------------
 
-proposed_quantity_summary <- proposed_model_quantities |>
-  summarise(
-    RawInputValue = sum(RawInputValue, na.rm = TRUE),
-    FundingQuantity = sum(FundingQuantity, na.rm = TRUE),
-    RowsMissingInput = sum(!CalculationComplete),
-    CalculationComplete = all(CalculationComplete),
-    .by = c(
-      OperationalEnrollmentBasis,
-      CharterBuildingPolicy,
-      FundingSection,
-      QuantityType,
-      Component
-    )
-  ) |>
-  mutate(SummaryScope = "Includes DAFB", .before = 1) |>
-  arrange(FundingSection, Component)
+summarise_proposed_quantities <- function(data, scope_label) {
+  data |>
+    summarise(
+      RawInputValue = sum(RawInputValue, na.rm = TRUE),
+      FundingQuantity = sum(FundingQuantity, na.rm = TRUE),
+      RowsMissingInput = sum(!CalculationComplete),
+      CalculationComplete = all(CalculationComplete),
+      .by = c(
+        OperationalEnrollmentBasis,
+        CharterBuildingPolicy,
+        FundingSection,
+        QuantityType,
+        Component
+      )
+    ) |>
+    mutate(SummaryScope = scope_label, .before = 1)
+}
+
+proposed_quantity_summary <- bind_rows(
+  proposed_model_quantities |>
+    filter(IncludeInStatewide) |>
+    summarise_proposed_quantities("Aligned IV&V scope (DAFB excluded)"),
+  proposed_model_quantities |>
+    summarise_proposed_quantities("Source audit (includes DAFB)")
+) |>
+  arrange(SummaryScope, FundingSection, Component)
 
 missing_input_issues <- proposed_model_quantities |>
-  filter(!CalculationComplete) |>
+  filter(IncludeInStatewide, !CalculationComplete) |>
   count(Component, name = "AffectedRows") |>
   transmute(
     Priority = "Needs data",
@@ -1010,12 +1050,19 @@ assumption_issues <- tribble(
     "revise the recalculation method only if the implementation guidance changes."
   ),
 
-  "Documented assumption",
+  "Confirmed scope decision",
   "Dover Air Force Base",
-  "DAFB is calculated normally and excluded from statewide totals.",
+  "DAFB does not receive state funding and is excluded from the aligned IV&V scope.",
   NA_integer_,
-  "IncludeInStatewide is FALSE for DAFB.",
-  "Change lea_crosswalk.csv only if the statewide universe changes.",
+  paste(
+    "Source rows may be retained and calculated for workbook audit, but",
+    "IncludeInStatewide is FALSE and all aligned Base, Central Office,",
+    "Opportunity, Operational, and total modeled funding summaries exclude DAFB."
+  ),
+  paste(
+    "Retain DAFB only in source-audit and PEFC reconciliation outputs needed",
+    "to document the workbook scope discrepancy."
+  ),
 
   "Documented implementation choice",
   "Assistant Superintendent",

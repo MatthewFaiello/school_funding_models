@@ -37,6 +37,25 @@ run_settings <- read_csv(
   show_col_types = FALSE
 )
 
+excluded_lea_codes <- run_settings |>
+  filter(
+    Setting == "Primary excluded LEA codes"
+  ) |>
+  pull(
+    Value
+  ) |>
+  strsplit(
+    split = ";",
+    fixed = TRUE
+  ) |>
+  unlist() |>
+  trimws() |>
+  as.integer()
+
+excluded_lea_codes <- excluded_lea_codes[
+  !is.na(excluded_lea_codes)
+]
+
 shared_model_input <- read_csv(
   "data/output/intermediate/02_shared_model_input.csv",
   show_col_types = FALSE
@@ -85,30 +104,42 @@ primary_scope_leas <- proposed_calculation_units |>
     IncludeInStatewide
   )
 
+stopifnot(
+  !any(
+    primary_scope_leas$DistrictCode %in%
+      excluded_lea_codes
+  )
+)
+
 # -----------------------------------------------------------------------------
 # 4. Students
 # -----------------------------------------------------------------------------
 
 primary_scope_students <- shared_model_input |>
   filter(
-    AggregationLevel == "Statewide",
-    
-    DistrictName ==
-      "State Total Excluding Dover Air Force Base"
+    AggregationLevel == "District",
+    DistrictCode %in% primary_scope_leas$DistrictCode
+  ) |>
+  summarise(
+    Enrollment = sum(
+      Enrollment,
+      na.rm = FALSE
+    )
   ) |>
   pull(
     Enrollment
   )
 
 stopifnot(
-  length(primary_scope_students) == 1L
+  length(primary_scope_students) == 1L,
+  !is.na(primary_scope_students)
 )
 
 # -----------------------------------------------------------------------------
 # 5. Official coded schools
 #
-# Step 02 contains 232 official coded-school records before scope exclusions:
-# 229 in the primary scope and 3 for DAFB.
+# Official coded-school records are restricted to the maintained primary LEA
+# scope. Audit-only records for excluded LEAs, including DAFB, are not counted.
 # -----------------------------------------------------------------------------
 
 official_coded_schools <- shared_model_input |>
@@ -134,7 +165,8 @@ official_coded_schools <- shared_model_input |>
 proposed_school_units <- proposed_calculation_units |>
   filter(
     IncludeInStatewide,
-    IsSchoolCalculationUnit
+    IsSchoolCalculationUnit,
+    !DistrictCode %in% excluded_lea_codes
   )
 
 # -----------------------------------------------------------------------------

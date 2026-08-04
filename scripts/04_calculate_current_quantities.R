@@ -11,6 +11,7 @@
 #   04_current_model_rules.csv
 #   04_current_model_quantity_summary.csv
 #   04_current_model_issues.csv
+#   04_current_outside_formula_components.csv
 # =============================================================================
 
 source(file.path("scripts", "00_settings.R"))
@@ -39,8 +40,22 @@ current_rules_path <- file.path(
   output_dir,
   "04_current_model_rules.csv"
 )
+current_district_cafeteria_input_path <- file.path(
+  output_dir,
+  "03_current_district_cafeteria_allocation.csv"
+)
+current_outside_formula_path <- file.path(
+  output_dir,
+  "04_current_outside_formula_components.csv"
+)
 
-check_required_files(c(current_school_input_path, current_lea_input_path))
+check_required_files(
+  c(
+    current_school_input_path,
+    current_lea_input_path,
+    current_district_cafeteria_input_path
+  )
+)
 
 
 # FORMULA HELPERS ---------------------------------------------------------------
@@ -100,6 +115,16 @@ lea_input <- read_csv(
     IncludeInStatewide = as.logical(IncludeInStatewide)
   )
 
+
+district_cafeteria_allocation <- read_csv(
+  current_district_cafeteria_input_path,
+  show_col_types = FALSE
+) |>
+  mutate(
+    DistrictCode = as.integer(DistrictCode),
+    SchoolYear = as.integer(SchoolYear)
+  )
+
 check_required_columns(
   school_input,
   c(
@@ -123,9 +148,7 @@ check_required_columns(
     "UnitsComplex",
     "UnitsVocational",
     "UnitsVocationalDeduct",
-    "UnitsTotal",
-    "CustodianPositions",
-    "SatelliteCafeteriaCount"
+    "UnitsTotal"
   ),
   "03_current_school_input.csv"
 )
@@ -210,20 +233,11 @@ current_model_rules <- tribble(
   "School", "Driver Education Teacher", "Position", "Grade10Enrollment",
   "Grade 10 enrollment divided by 125.",
 
-  "School", "Custodians", "Position", "CustodianPositions",
-  "Use site-evaluated custodian positions.",
-
-  "School", "Cafeteria Manager", "Position", "SatelliteCafeteriaCount",
-  "Charters earn 0.73 plus 0.73 per satellite.",
-
-  "School", "Cafeteria Worker", "Position", "Enrollment",
-  "Charters earn 0.0062 positions per student.",
-
   "LEA", "Superintendent", "Position", "LEAType",
-  "One per district; DAFB is treated as a district; charters are ineligible.",
+  "One per funded district; charters and DAFB are ineligible.",
 
   "LEA", "Assistant Superintendent", "Position", "UnitsTotal",
-  "One per completed 300 Division I units, capped at two, for districts and DAFB.",
+  "One per completed 300 Division I units, capped at two, for funded districts.",
 
   "LEA", "Director", "Position", "UnitsTotal",
   "One at 200 units plus one per completed additional 100, capped at six.",
@@ -250,13 +264,13 @@ current_model_rules <- tribble(
   "One when custodial units are at least 95.",
 
   "LEA", "Food Services Supervisor", "Position", "SchoolLunchBuildingCount",
-  "Districts and DAFB earn one at 500 units or with at least four lunch buildings.",
+  "Funded districts earn one at 500 units or with at least four lunch-program buildings.",
 
   "LEA", "Transportation Supervisor", "Position", "Enrollment",
   "Enrollment divided by 7,500; fractional positions are allowed.",
 
   "LEA", "Reading Cadre", "Position", "LEAType",
-  "One per district; DAFB is treated as a district; charters are ineligible."
+  "One per funded district; charters and DAFB are ineligible."
 )
 
 
@@ -296,18 +310,6 @@ school_calculations <- school_input |>
     `Driver Education Teacher` = case_when(
       !IsSchool ~ 0,
       TRUE ~ Grade10Enrollment / 125
-    ),
-    Custodians = case_when(
-      !IsSchool ~ 0,
-      TRUE ~ CustodianPositions
-    ),
-    `Cafeteria Manager` = case_when(
-      !IsSchool | LEAType != "Charter" ~ 0,
-      TRUE ~ 0.73 * (1 + coalesce(SatelliteCafeteriaCount, 0))
-    ),
-    `Cafeteria Worker` = case_when(
-      !IsSchool | LEAType != "Charter" ~ 0,
-      TRUE ~ Enrollment * 0.0062
     )
   )
 
@@ -338,8 +340,6 @@ school_quantities <- school_calculations |>
     K8Enrollment,
     Grade10Enrollment,
     Enrollment,
-    CustodianPositions,
-    SatelliteCafeteriaCount,
     `Division I Teacher - Pre-K` = UnitsPreK,
     `Division I Teacher - K-3 Regular Education` = UnitsK3,
     `Division I Teacher - 4-12 Regular Education` = Units4_12,
@@ -355,10 +355,7 @@ school_quantities <- school_calculations |>
     Nurse,
     `Academic Excellence`,
     Secretary,
-    `Driver Education Teacher`,
-    Custodians,
-    `Cafeteria Manager`,
-    `Cafeteria Worker`
+    `Driver Education Teacher`
   ) |>
   pivot_longer(
     cols = all_of(school_components),
@@ -381,9 +378,6 @@ school_quantities <- school_calculations |>
       Component %in% c("Counselor / Social Worker", "School Psychologist") ~ K8Enrollment,
       Component == "Academic Excellence" ~ Enrollment,
       Component == "Driver Education Teacher" ~ Grade10Enrollment,
-      Component == "Custodians" ~ CustodianPositions,
-      Component == "Cafeteria Manager" ~ SatelliteCafeteriaCount,
-      Component == "Cafeteria Worker" ~ Enrollment,
       TRUE ~ NA_real_
     ),
     AppliedFactor = case_when(
@@ -395,14 +389,12 @@ school_quantities <- school_calculations |>
         "Division I Teacher - Intensive Special Education",
         "Division I Teacher - Complex Special Education",
         "Vocational Division I",
-        "Vocational Deduct",
-        "Custodians"
+        "Vocational Deduct"
       ) ~ 1,
       Component == "Counselor / Social Worker" ~ 1 / 250,
       Component == "School Psychologist" ~ 1 / 700,
       Component == "Academic Excellence" ~ 1 / 250,
       Component == "Driver Education Teacher" ~ 1 / 125,
-      Component == "Cafeteria Worker" ~ 0.0062,
       TRUE ~ NA_real_
     ),
     CalculationStatus = case_when(
@@ -410,31 +402,11 @@ school_quantities <- school_calculations |>
         !Component %in% c("Vocational Division I", "Vocational Deduct") ~
         "Not a school-code row",
       Component %in% school_components[1:8] ~ "Reported",
-      Component == "Custodians" & is.na(FundingQuantity) ~ "Missing input",
-      Component == "Custodians" ~ "Provided input",
-      Component == "Cafeteria Manager" & LEAType != "Charter" ~
-        "Not modeled for districts",
-      Component == "Cafeteria Manager" & is.na(SatelliteCafeteriaCount) ~
-        "Base only; satellite count missing",
-      Component == "Cafeteria Worker" & LEAType != "Charter" ~
-        "Not modeled for districts",
       Component == "Nurse" ~ "Calculated using the 30-percent fractional rule",
       TRUE ~ "Calculated"
     ),
-    InputComplete = case_when(
-      !IsSchool &
-        !Component %in% c("Vocational Division I", "Vocational Deduct") ~
-        TRUE,
-      Component == "Custodians" ~ !is.na(CustodianPositions),
-      Component == "Cafeteria Manager" & LEAType == "Charter" ~
-        !is.na(SatelliteCafeteriaCount),
-      TRUE ~ TRUE
-    ),
-    QuantityProvisional =
-      IsSchool &
-      LEAType == "Charter" &
-      Component == "Cafeteria Manager" &
-      is.na(SatelliteCafeteriaCount),
+    InputComplete = TRUE,
+    QuantityProvisional = FALSE,
     CalculationComplete = !is.na(FundingQuantity)
   ) |>
   select(
@@ -464,7 +436,7 @@ school_quantities <- school_calculations |>
 
 lea_calculations <- lea_input |>
   mutate(
-    IsDistrict = LEAType %in% c("District", "Dover Air Force Base"),
+    IsDistrict = LEAType == "District" & IncludeInStatewide,
     Superintendent = case_when(IsDistrict ~ 1, TRUE ~ 0),
     `Assistant Superintendent` = case_when(
       IsDistrict ~ pmin(floor(UnitsTotal / 300), 2),
@@ -478,6 +450,7 @@ lea_calculations <- lea_input |>
     `Related Services Specialist - Complex` = UnitsComplex / 3,
     `Visiting Teacher` = UnitsTotal / 250,
     `Buildings and Grounds Supervisor` = case_when(
+      !IsDistrict ~ 0,
       is.na(CustodialUnits) ~ NA_real_,
       CustodialUnits >= 95 ~ 1,
       TRUE ~ 0
@@ -567,10 +540,11 @@ lea_quantities <- lea_calculations |>
     CalculationStatus = case_when(
       is.na(FundingQuantity) ~ "Missing input",
       DistrictCode == dafb_district_code ~
-        "Calculated normally; excluded from statewide totals",
+        "Retained for source audit; excluded from modeled state funding",
       Component %in% c(
         "Superintendent",
         "Assistant Superintendent",
+        "Buildings and Grounds Supervisor",
         "Food Services Supervisor",
         "Reading Cadre"
       ) & !IsDistrict ~ "Ineligible",
@@ -578,7 +552,7 @@ lea_quantities <- lea_calculations |>
     ),
     InputComplete = case_when(
       Component == "Buildings and Grounds Supervisor" ~
-        !is.na(CustodialUnits),
+        !IsDistrict | !is.na(CustodialUnits),
       Component == "Food Services Supervisor" ~
         !IsDistrict |
         UnitsTotal >= 500 |
@@ -609,6 +583,155 @@ lea_quantities <- lea_calculations |>
     QuantityProvisional,
     CalculationComplete
   )
+
+
+# OUTSIDE-FORMULA REFERENCE COMPONENTS -----------------------------------------
+
+# Brian's FY2025-26 implementation guidance identifies ASPIRA and MOT as the
+# only charters receiving one additional 0.73 cafeteria-manager allocation for
+# a satellite cafeteria. These reference quantities are documented here but do
+# not enter the position-based model comparison.
+charter_satellite_cafeterias <- tribble(
+  ~DistrictCode, ~SatelliteCafeteriaCount,
+  69L, 1,
+  88L, 1
+)
+
+primary_charters <- lea_input |>
+  filter(LEAType == "Charter", IncludeInStatewide) |>
+  distinct(
+    SchoolYear,
+    CountDate,
+    DistrictCode,
+    DistrictName,
+    LEAType,
+    IncludeInStatewide,
+    Enrollment
+  ) |>
+  left_join(charter_satellite_cafeterias, by = "DistrictCode") |>
+  mutate(SatelliteCafeteriaCount = coalesce(SatelliteCafeteriaCount, 0))
+
+stop_if_rows(
+  charter_satellite_cafeterias |>
+    anti_join(primary_charters, by = "DistrictCode"),
+  "A documented charter satellite cafeteria does not match the primary charter scope."
+)
+
+outside_formula_custodians <- tibble(
+  Model = "Current model",
+  RecordType = "Policy documentation",
+  SchoolYear = school_year,
+  CountDate = count_date,
+  DistrictCode = NA_integer_,
+  DistrictName = "Statewide documentation",
+  LEAType = NA_character_,
+  IncludeInStatewide = FALSE,
+  Component = "Custodians",
+  QuantityType = "Site-evaluated positions",
+  RawInputValue = NA_real_,
+  AppliedFactor = NA_real_,
+  ReferenceQuantity = NA_real_,
+  FundingAmount = NA_real_,
+  AllocationBasis = "Positions are determined through site evaluations.",
+  Source = "FY2025-26 implementation guidance from Brian",
+  InclusionStatus = "Outside formula; excluded from position-based comparison",
+  Notes = paste(
+    "School-level custodian allocations are not required for the IV&V comparison.",
+    "Custodial-unit data remain required for Buildings and Grounds Supervisor eligibility."
+  )
+)
+
+outside_formula_charter_managers <- primary_charters |>
+  transmute(
+    Model = "Current model",
+    RecordType = "Reference quantity",
+    SchoolYear,
+    CountDate,
+    DistrictCode,
+    DistrictName,
+    LEAType,
+    IncludeInStatewide,
+    Component = "Cafeteria Manager",
+    QuantityType = "Charter reference position quantity",
+    RawInputValue = as.numeric(SatelliteCafeteriaCount),
+    AppliedFactor = 0.73,
+    ReferenceQuantity = 0.73 * (1 + SatelliteCafeteriaCount),
+    FundingAmount = NA_real_,
+    AllocationBasis = "0.73 per charter plus 0.73 per satellite cafeteria.",
+    Source = "FY2025-26 implementation guidance from Brian",
+    InclusionStatus = "Outside formula; excluded from position-based comparison",
+    Notes = case_when(
+      SatelliteCafeteriaCount > 0 ~
+        "ASPIRA and MOT are the only charters documented as qualifying for the satellite addition.",
+      TRUE ~ "Base charter allocation only."
+    )
+  )
+
+outside_formula_charter_workers <- primary_charters |>
+  transmute(
+    Model = "Current model",
+    RecordType = "Reference quantity",
+    SchoolYear,
+    CountDate,
+    DistrictCode,
+    DistrictName,
+    LEAType,
+    IncludeInStatewide,
+    Component = "Cafeteria Worker",
+    QuantityType = "Charter reference position quantity",
+    RawInputValue = Enrollment,
+    AppliedFactor = 0.0062,
+    ReferenceQuantity = Enrollment * 0.0062,
+    FundingAmount = NA_real_,
+    AllocationBasis = "0.62 of a cafeteria worker per 100 students.",
+    Source = "FY2025-26 implementation guidance from Brian",
+    InclusionStatus = "Outside formula; excluded from position-based comparison",
+    Notes = "Reference quantity retained for documentation only."
+  )
+
+outside_formula_district_cafeteria <- district_cafeteria_allocation |>
+  transmute(
+    Model = "Current model",
+    RecordType = "Salary allocation",
+    SchoolYear,
+    CountDate = count_date,
+    DistrictCode,
+    DistrictName,
+    LEAType = "District",
+    IncludeInStatewide = TRUE,
+    Component = "District Cafeteria Salary Allocation",
+    QuantityType = "Outside-formula funding allocation",
+    RawInputValue = HoursRequested,
+    AppliedFactor = NA_real_,
+    ReferenceQuantity = NA_real_,
+    FundingAmount = TotalStateAllocation,
+    AllocationBasis = paste(
+      "Salary allocation based on meals, operating days, requested hours,",
+      "salary amounts, worker and manager state shares, and termination pay."
+    ),
+    Source = SourceFile,
+    InclusionStatus = "Outside formula; excluded from position-based comparison",
+    Notes
+  )
+
+current_outside_formula_components <- bind_rows(
+  outside_formula_custodians,
+  outside_formula_charter_managers,
+  outside_formula_charter_workers,
+  outside_formula_district_cafeteria
+) |>
+  arrange(Component, DistrictName)
+
+stop_if_rows(
+  current_outside_formula_components |>
+    filter(
+      Component %in% outside_formula_current_components,
+      InclusionStatus !=
+        "Outside formula; excluded from position-based comparison"
+    ),
+  "An outside-formula component is not classified correctly."
+)
+
 
 
 # COMBINE AND ADD RULE DESCRIPTIONS --------------------------------------------
@@ -669,11 +792,15 @@ current_quantity_summary <- current_model_quantities |>
     CalculationComplete = all(CalculationComplete),
     .by = c(CalculationLevel, QuantityType, Component)
   ) |>
-  mutate(SummaryScope = "Includes DAFB", .before = 1) |>
+  mutate(
+    SummaryScope =
+      "All source LEAs; DAFB retained for audit and excluded from primary totals",
+    .before = 1
+  ) |>
   arrange(CalculationLevel, Component)
 
 missing_input_issues <- current_model_quantities |>
-  filter(!InputComplete, Component != "Cafeteria Manager") |>
+  filter(!InputComplete) |>
   count(Component, name = "AffectedRows") |>
   transmute(
     Priority = "Needs data",
@@ -683,23 +810,6 @@ missing_input_issues <- current_model_quantities |>
     CurrentTreatment =
       "The funding quantity remains blank and the component remains incomplete.",
     Action = "Populate the applicable supplemental input."
-  )
-
-satellite_issue <- school_input |>
-  filter(
-    IsSchool,
-    LEAType == "Charter",
-    is.na(SatelliteCafeteriaCount)
-  ) |>
-  summarise(AffectedRows = n()) |>
-  filter(AffectedRows > 0) |>
-  transmute(
-    Priority = "Needs review",
-    Component = "Cafeteria Manager",
-    Issue = "Charter satellite counts are missing.",
-    AffectedRows,
-    CurrentTreatment = "Only the base 0.73 position is calculated.",
-    Action = "Provide satellite counts or confirm that all are zero."
   )
 
 policy_issues <- tribble(
@@ -732,24 +842,29 @@ policy_issues <- tribble(
   "The fractional portion is multiplied by 30 percent.",
   "Confirm the interpretation.",
 
-  "Documented assumption",
+  "Confirmed scope decision",
   "Dover Air Force Base",
-  "DAFB is treated like a district for LEA-level formulas.",
+  "DAFB does not receive state funding and is excluded from the modeled scope.",
   NA_integer_,
-  "DAFB is calculated normally and excluded from statewide summaries.",
-  "Revise only if DAFB eligibility changes.",
+  "Source records may be retained for audit, but DAFB is excluded from primary totals.",
+  "No further action is required unless the confirmed funding treatment changes.",
 
-  "Not modeled",
-  "District cafeteria positions",
-  "District cafeteria funding follows a separate process.",
+  "Outside formula",
+  "Custodians and cafeteria support",
+  paste(
+    "Custodians, Cafeteria Managers, and Cafeteria Workers are funded outside",
+    "the proposed position formula. District cafeteria support is a separate salary allocation."
+  ),
   NA_integer_,
-  "Only charter cafeteria formulas are included.",
-  "Add the district process when it becomes available."
+  paste(
+    "Reference quantities and the FY26 district allocation are written to",
+    "04_current_outside_formula_components.csv and excluded from model totals."
+  ),
+  "Retain for documentation; do not add these items to the position-based comparison."
 )
 
 current_quantity_issues <- bind_rows(
   missing_input_issues,
-  satellite_issue,
   policy_issues
 )
 
@@ -757,7 +872,9 @@ write_model_csv(current_model_quantities, current_quantities_path)
 write_review_csv(current_model_rules, current_rules_path)
 write_review_csv(current_quantity_summary, current_quantity_summary_path)
 write_review_csv(current_quantity_issues, current_quantity_issues_path)
+write_review_csv(current_outside_formula_components, current_outside_formula_path)
 
 message("Created current-model quantities: ", current_quantities_path)
 message("Review current-model rules: ", current_rules_path)
 message("Review current-model issues: ", current_quantity_issues_path)
+message("Review outside-formula components: ", current_outside_formula_path)

@@ -12,7 +12,7 @@ library(readr)
 library(stringr)
 
 # -----------------------------------------------------------------------------
-# 1. Read proposed-model funding detail
+# 1. Read proposed-model funding detail and final comparison outputs
 # -----------------------------------------------------------------------------
 
 proposed_detail <- read_csv(
@@ -20,7 +20,17 @@ proposed_detail <- read_csv(
   show_col_types = FALSE
 )
 
-required_columns <- c(
+final_weighted_state <- read_csv(
+  "data/output/final/11_opportunity_operational_comparison.csv",
+  show_col_types = FALSE
+)
+
+final_weighted_lea <- read_csv(
+  "data/output/final/11_opportunity_operational_lea_comparison.csv",
+  show_col_types = FALSE
+)
+
+required_proposed_columns <- c(
   "DistrictCode",
   "DistrictName",
   "LEAType",
@@ -31,16 +41,57 @@ required_columns <- c(
   "FundingAmount"
 )
 
-missing_columns <- setdiff(
-  required_columns,
+required_state_columns <- c(
+  "FundingCategory",
+  "ProposedFundingAmount"
+)
+
+required_lea_columns <- c(
+  "DistrictCode",
+  "DistrictName",
+  "LEAType",
+  "FundingCategory",
+  "ProposedFundingAmount"
+)
+
+missing_proposed_columns <- setdiff(
+  required_proposed_columns,
   names(proposed_detail)
 )
 
-if (length(missing_columns) > 0) {
+missing_state_columns <- setdiff(
+  required_state_columns,
+  names(final_weighted_state)
+)
+
+missing_lea_columns <- setdiff(
+  required_lea_columns,
+  names(final_weighted_lea)
+)
+
+if (length(missing_proposed_columns) > 0) {
   stop(
     paste(
-      "The input file is missing required columns:",
-      paste(missing_columns, collapse = ", ")
+      "The proposed funding detail is missing required columns:",
+      paste(missing_proposed_columns, collapse = ", ")
+    )
+  )
+}
+
+if (length(missing_state_columns) > 0) {
+  stop(
+    paste(
+      "The final statewide weighted-funding output is missing required columns:",
+      paste(missing_state_columns, collapse = ", ")
+    )
+  )
+}
+
+if (length(missing_lea_columns) > 0) {
+  stop(
+    paste(
+      "The final LEA weighted-funding output is missing required columns:",
+      paste(missing_lea_columns, collapse = ", ")
     )
   )
 }
@@ -62,6 +113,9 @@ weighted_components <- c(
 )
 
 weighted_detail <- proposed_detail |>
+  mutate(
+    IncludeInStatewide = as.logical(IncludeInStatewide)
+  ) |>
   filter(
     IncludeInStatewide,
     LEAType %in% c("District", "Charter"),
@@ -88,6 +142,54 @@ lea_funding <- weighted_detail |>
       LEAType
     )
   )
+
+final_lea_funding <- final_weighted_lea |>
+  filter(
+    FundingCategory %in% c(
+      "Opportunity Funding",
+      "Operational Funding"
+    )
+  ) |>
+  summarise(
+    FinalCombinedWeightedFunding = sum(
+      ProposedFundingAmount,
+      na.rm = TRUE
+    ),
+    .by = c(
+      DistrictCode,
+      DistrictName,
+      LEAType
+    )
+  )
+
+lea_funding_reconciliation <- lea_funding |>
+  full_join(
+    final_lea_funding,
+    by = c(
+      "DistrictCode",
+      "DistrictName",
+      "LEAType"
+    )
+  ) |>
+  mutate(
+    Difference =
+      CombinedWeightedFunding - FinalCombinedWeightedFunding
+  )
+
+expected_statewide_weighted_funding <- final_weighted_state |>
+  filter(
+    FundingCategory %in% c(
+      "Opportunity Funding",
+      "Operational Funding"
+    )
+  ) |>
+  summarise(
+    Amount = sum(
+      ProposedFundingAmount,
+      na.rm = TRUE
+    )
+  ) |>
+  pull(Amount)
 
 # -----------------------------------------------------------------------------
 # 4. Calculate total enrollment by LEA
@@ -292,6 +394,11 @@ stopifnot(
     lea_rankings$LEAType == "Charter"
   ) == 24,
   
+  # Confirmed primary scope
+  !any(
+    lea_rankings$DistrictName == "Dover Air Force Base"
+  ),
+  
   # Statewide enrollment
   sum(
     lea_rankings$TotalEnrollment
@@ -299,9 +406,34 @@ stopifnot(
   
   # Fixed Opportunity and Operational pools
   abs(
+    expected_statewide_weighted_funding - 442026800
+  ) < 0.05,
+  
+  abs(
     sum(
       lea_rankings$CombinedWeightedFunding
-    ) - 442026800
+    ) - expected_statewide_weighted_funding
+  ) < 0.05,
+  
+  # LEA allocations reconcile to the final report-ready output
+  nrow(lea_funding_reconciliation) == 43,
+  
+  all(
+    !is.na(
+      lea_funding_reconciliation$CombinedWeightedFunding
+    )
+  ),
+  
+  all(
+    !is.na(
+      lea_funding_reconciliation$FinalCombinedWeightedFunding
+    )
+  ),
+  
+  max(
+    abs(
+      lea_funding_reconciliation$Difference
+    )
   ) < 0.05,
   
   # Correlations cited in the report
@@ -326,7 +458,17 @@ stopifnot(
 )
 
 message(
-  "All LEA ranking and correlation checks passed."
+  paste0(
+    "All LEA ranking, scope, funding-reconciliation, and correlation checks passed. ",
+    "The analysis covers 43 funded LEAs, includes BASSE, excludes DAFB, and ",
+    "reconciles to $",
+    format(
+      expected_statewide_weighted_funding,
+      big.mark = ",",
+      scientific = FALSE
+    ),
+    " in proposed Opportunity and Operational Funding."
+  )
 )
 
 # -----------------------------------------------------------------------------
@@ -339,7 +481,10 @@ narrative_examples
 
 lea_rankings
 
+lea_funding_reconciliation
+
 # Optional RStudio data viewers
 View(correlation_summary)
 View(narrative_examples)
 View(lea_rankings)
+View(lea_funding_reconciliation)

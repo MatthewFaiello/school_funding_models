@@ -6,8 +6,9 @@ library(scales)
 # -----------------------------------------------------------------------------
 # Distribution of comparable staffing funding changes by LEA type
 #
-# Comparable amounts include only categories with known funding amounts
-# under both models. Provisional category comparisons remain included.
+# Comparable amounts follow the statewide comparable-amount subtotal.
+# That subtotal removes categories with no current funding amount, but it can
+# still include provisional categories with partially known current amounts.
 # BASSE is included and DAFB is excluded.
 # -----------------------------------------------------------------------------
 
@@ -48,6 +49,18 @@ noncomparable_categories <- staffing_components |>
 # "Buildings and Grounds Supervisor"
 print(noncomparable_categories)
 
+provisional_comparable_categories <- staffing_components |>
+  filter(
+    IncludedInComparableAmountSubtotal,
+    ComparisonStatus != "Confirmed"
+  ) |>
+  distinct(ComparisonCategory) |>
+  pull(ComparisonCategory)
+
+# Expected result under the current run:
+# "Food Services Supervisor"
+print(provisional_comparable_categories)
+
 # -----------------------------------------------------------------------------
 # Calculate excluded proposed funding by LEA
 # -----------------------------------------------------------------------------
@@ -85,8 +98,9 @@ lea_changes <- staffing_lea |>
       0
     ),
     
-    # The current working total already excludes categories
-    # without a known current funding amount
+    # The current working total omits unknown current amounts. The resulting
+    # LEA comparison remains provisional where an included category has
+    # incomplete current inputs, such as Food Services Supervisor.
     ComparableCurrentFundingAmount =
       WorkingCurrentFundingAmount,
     
@@ -220,6 +234,18 @@ x_breaks <- seq(
 # Create plot
 # -----------------------------------------------------------------------------
 
+provisional_comparable_note <- if (
+  length(provisional_comparable_categories) > 0
+) {
+  paste0(
+    "The comparable subtotal includes provisional comparisons for ",
+    paste(provisional_comparable_categories, collapse = ", "),
+    "; LEA values remain provisional where current inputs are incomplete."
+  )
+} else {
+  "All categories in the comparable subtotal are confirmed."
+}
+
 funding_change_distribution_plot <- ggplot(
   lea_changes,
   aes(
@@ -343,8 +369,9 @@ funding_change_distribution_plot <- ggplot(
     caption = stringr::str_wrap(
       paste(
         "Each point represents one LEA; diamonds mark medians.",
-        "Comparable amounts include categories with known funding under both models,",
-        "including provisional comparisons. BASSE is included; DAFB is excluded."
+        "LEA amounts follow the statewide comparable-amount subtotal.",
+        provisional_comparable_note,
+        "BASSE is included; DAFB is excluded."
       ),
       width = 150
     )

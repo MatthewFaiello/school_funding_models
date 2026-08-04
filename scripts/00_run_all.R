@@ -22,6 +22,20 @@ if (length(prior_outputs) > 0 && !all(file.remove(prior_outputs))) {
 
 run_settings_path <- file.path(audit_dir, "00_run_settings.csv")
 run_manifest_path <- file.path(audit_dir, "00_run_manifest.csv")
+cafeteria_documentation_path <- file.path(
+  project_dir,
+  "documentation",
+  "FY26 Cafeteria.xlsx"
+)
+
+if (!file.exists(cafeteria_documentation_path)) {
+  stop(
+    "Required documentation source is missing: ",
+    cafeteria_documentation_path,
+    call. = FALSE
+  )
+}
+
 run_started_time <- Sys.time()
 run_completed_time <- as.POSIXct(NA)
 run_status <- "Started"
@@ -44,6 +58,10 @@ write_run_settings <- function() {
       "PEFC model label",
       "Primary reporting scope",
       "Primary excluded LEA codes",
+      "DAFB scope decision",
+      "Outside-formula current components",
+      "District cafeteria documentation source",
+      "District cafeteria maintained input",
       "Operational enrollment basis",
       "Weighted rate method",
       "Opportunity funding pool",
@@ -68,6 +86,24 @@ write_run_settings <- function() {
       pefc_model_label,
       primary_reporting_scope_label,
       paste(primary_reporting_excluded_lea_codes, collapse = ","),
+      dafb_scope_decision,
+      paste(outside_formula_current_components, collapse = "; "),
+      str_remove(
+        normalizePath(
+          cafeteria_documentation_path,
+          winslash = "/",
+          mustWork = FALSE
+        ),
+        fixed(paste0(project_dir, "/"))
+      ),
+      str_remove(
+        normalizePath(
+          current_district_cafeteria_allocation_path,
+          winslash = "/",
+          mustWork = FALSE
+        ),
+        fixed(paste0(project_dir, "/"))
+      ),
       operational_enrollment_basis,
       weighted_rate_method,
       as.character(opportunity_funding_pool),
@@ -93,15 +129,22 @@ write_run_manifest <- function() {
     pattern = "\\.(R|sql)$",
     full.names = TRUE
   )
+  documentation_files <- cafeteria_documentation_path
   output_files <- list.files(
     output_root_dir,
     recursive = TRUE,
     full.names = TRUE
   )
 
-  manifest_paths <- c(input_files, script_files, output_files)
+  manifest_paths <- c(
+    input_files,
+    documentation_files,
+    script_files,
+    output_files
+  )
   manifest_types <- c(
     rep("Maintained input", length(input_files)),
+    rep("Documentation source", length(documentation_files)),
     rep("Script", length(script_files)),
     rep("Generated output", length(output_files))
   )

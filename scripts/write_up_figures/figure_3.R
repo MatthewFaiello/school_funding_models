@@ -11,6 +11,11 @@ proposed_detail <- read_csv(
   show_col_types = FALSE
 )
 
+weighted_lea_comparison <- read_csv(
+  "data/output/final/11_opportunity_operational_lea_comparison.csv",
+  show_col_types = FALSE
+)
+
 # -----------------------------------------------------------------------------
 # Component order, labels, and colors
 # -----------------------------------------------------------------------------
@@ -176,14 +181,29 @@ district_plot_data <- district_plot_data |>
 # Validation
 # -----------------------------------------------------------------------------
 
+expected_district_total <- weighted_lea_comparison |>
+  filter(
+    LEAType == "District",
+    FundingCategory %in% c(
+      "Opportunity Funding",
+      "Operational Funding"
+    )
+  ) |>
+  summarise(
+    ProposedFundingAmount = sum(ProposedFundingAmount, na.rm = TRUE)
+  ) |>
+  pull(ProposedFundingAmount)
+
 stopifnot(
   n_distinct(district_plot_data$DistrictCode) == 19,
   
   n_distinct(district_plot_data$ComponentLabel) == 9,
   
+  !any(district_plot_data$DistrictCode == 14L),
+  
   abs(
     sum(district_plot_data$FundingAmount) -
-      391962895
+      expected_district_total
   ) < 0.05,
   
   all(
@@ -268,7 +288,15 @@ figure3 <- ggplot(
   labs(
     x = "\nProposed Opportunity and Operational Funding",
     y = NULL,
-    fill = NULL
+    fill = NULL,
+    caption = stringr::str_wrap(
+      paste(
+        "District allocations under the independently reproduced proposed model.",
+        "Charters are not displayed, DAFB is excluded, and current funding analogues",
+        "remain pending confirmation from OMB and CGO."
+      ),
+      width = 150
+    )
   ) +
   coord_cartesian(
     clip = "off"
@@ -310,6 +338,12 @@ figure3 <- ggplot(
     legend.spacing.x = grid::unit(0.08, "cm"),
     legend.margin = margin(t = 2),
     
+    plot.caption = element_text(
+      size = 6.7,
+      color = "#595959",
+      hjust = 0,
+      margin = margin(t = 7)
+    ),
     plot.margin = margin(
       t = 5,
       r = 30,

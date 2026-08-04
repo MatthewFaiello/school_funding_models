@@ -84,6 +84,29 @@ stop_if_rows(
   "A proposed-model component is missing from funding_rates.csv."
 )
 
+# DAFB may remain in the proposed quantity file for source and PEFC workbook
+# auditing, but it must never enter an aligned IV&V funding calculation.
+stop_if_rows(
+  quantities |>
+    filter(
+      DistrictCode == dafb_district_code,
+      IncludeInStatewide
+    ),
+  paste0(
+    "DAFB is marked IncludeInStatewide in the proposed quantity file. ",
+    "DAFB does not receive state funding and must remain outside aligned IV&V totals."
+  )
+)
+
+stop_if_rows(
+  quantities |>
+    filter(
+      DistrictCode %in% primary_reporting_excluded_lea_codes,
+      IncludeInStatewide
+    ),
+  "An LEA excluded from the primary reporting scope is marked IncludeInStatewide."
+)
+
 model_settings <- quantities |>
   distinct(OperationalEnrollmentBasis, CharterBuildingPolicy)
 
@@ -166,7 +189,7 @@ proposed_weighted_rate_summary <- quantities |>
     ),
     OperationalEnrollmentBasis = operational_enrollment_basis,
     CharterBuildingPolicy = charter_building_policy,
-    StatewideScope = "Excludes DAFB"
+    StatewideScope = primary_reporting_scope_short
   ) |>
   select(
     StatewideScope,
@@ -258,7 +281,7 @@ proposed_weighted_component_summary <- proposed_model_funding_detail |>
     )
   ) |>
   mutate(
-    StatewideScope = "Excludes DAFB",
+    StatewideScope = primary_reporting_scope_short,
     .before = 1
   ) |>
   arrange(FundingSection, Component)
@@ -412,7 +435,7 @@ proposed_state_summary <- proposed_model_funding_detail |>
       CharterBuildingPolicy
     )
   ) |>
-  mutate(StatewideScope = "Excludes DAFB", .before = 1) |>
+  mutate(StatewideScope = primary_reporting_scope_short, .before = 1) |>
   arrange(FundingSection, Component)
 
 
@@ -420,6 +443,7 @@ proposed_state_summary <- proposed_model_funding_detail |>
 
 proposed_rate_issues <- proposed_model_funding_detail |>
   filter(
+    IncludeInStatewide,
     CalculationComplete,
     abs(FundingQuantity) > 1e-8,
     !RateAvailable

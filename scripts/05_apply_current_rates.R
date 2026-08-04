@@ -79,7 +79,8 @@ valid_rate_categories <- c(
   "Calculator-supplied",
   "Documented crosswalk",
   "Analytical assumption",
-  "Not available"
+  "Not available",
+  "Outside formula"
 )
 
 stop_if_rows(
@@ -107,6 +108,29 @@ stop_if_rows(
     distinct(Component) |>
     anti_join(rate_map, by = "Component"),
   "A current-model component is missing from current_rate_map.csv."
+)
+
+stop_if_rows(
+  rate_map |>
+    filter(RateCategory == "Outside formula", !is.na(RateComponent), RateComponent != ""),
+  paste(
+    "Outside-formula components must not be assigned a PEFC rate component",
+    "in current_rate_map.csv."
+  )
+)
+
+stop_if_rows(
+  quantities |>
+    distinct(Component) |>
+    inner_join(
+      rate_map |> select(Component, RateCategory),
+      by = "Component"
+    ) |>
+    filter(RateCategory == "Outside formula"),
+  paste(
+    "Outside-formula components must be retained in the separate Step 04",
+    "documentation output rather than 04_current_model_quantities.csv."
+  )
 )
 
 

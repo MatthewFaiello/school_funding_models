@@ -5,11 +5,21 @@
 #   A. Staffing rules use the same common rates for comparable positions.
 #   B. Opportunity and Operational Funding are compared separately.
 #
-# All available calculations are retained. Confirmed, provisional, and not-yet-
-# estimable results are clearly flagged rather than removed from final outputs.
+# All formula-based calculations are retained. Confirmed, provisional, and
+# not-yet-estimable results are clearly flagged. Components confirmed as funded
+# outside the proposed position formula are preserved in a separate Step 04 audit
+# output and are excluded from the staffing comparison by design.
 # =============================================================================
 
 source(file.path("scripts", "00_settings.R"))
+
+collapse_nonblank_pair <- function(x, y) {
+  map2_chr(x, y, function(first_value, second_value) {
+    values <- str_squish(c(first_value, second_value))
+    values <- unique(values[!is.na(values) & values != ""])
+    paste(values, collapse = " | ")
+  })
+}
 
 current_detail_path <- file.path(
   intermediate_dir,
@@ -18,6 +28,10 @@ current_detail_path <- file.path(
 proposed_detail_path <- file.path(
   intermediate_dir,
   "08_proposed_model_funding_detail.csv"
+)
+outside_formula_detail_path <- file.path(
+  intermediate_dir,
+  "04_current_outside_formula_components.csv"
 )
 
 staffing_component_path <- file.path(
@@ -45,6 +59,7 @@ comparison_qc_path <- file.path(audit_dir, "09_comparison_qc.csv")
 check_required_files(c(
   current_detail_path,
   proposed_detail_path,
+  outside_formula_detail_path,
   model_comparison_crosswalk_path,
   current_opportunity_operational_path,
   lea_crosswalk_path
@@ -57,7 +72,10 @@ current_detail <- read_csv(current_detail_path, show_col_types = FALSE) |>
     CalculationComplete = as.logical(CalculationComplete),
     FundingComplete = as.logical(FundingComplete)
   ) |>
-  filter(!DistrictCode %in% primary_reporting_excluded_lea_codes)
+  filter(
+    IncludeInStatewide,
+    !DistrictCode %in% primary_reporting_excluded_lea_codes
+  )
 
 proposed_detail <- read_csv(proposed_detail_path, show_col_types = FALSE) |>
   mutate(
@@ -66,7 +84,21 @@ proposed_detail <- read_csv(proposed_detail_path, show_col_types = FALSE) |>
     CalculationComplete = as.logical(CalculationComplete),
     FundingComplete = as.logical(FundingComplete)
   ) |>
-  filter(!DistrictCode %in% primary_reporting_excluded_lea_codes)
+  filter(
+    IncludeInStatewide,
+    !DistrictCode %in% primary_reporting_excluded_lea_codes
+  )
+
+outside_formula_detail <- read_csv(
+  outside_formula_detail_path,
+  show_col_types = FALSE
+) |>
+  mutate(
+    DistrictCode = as.integer(DistrictCode),
+    IncludeInStatewide = as.logical(IncludeInStatewide),
+    Component = coalesce(Component, ""),
+    InclusionStatus = coalesce(InclusionStatus, "")
+  )
 
 comparison_crosswalk <- read_csv(
   model_comparison_crosswalk_path,
@@ -80,6 +112,78 @@ comparison_crosswalk <- read_csv(
     Notes = coalesce(Notes, "")
   )
 
+outside_formula_crosswalk <- comparison_crosswalk |>
+  filter(
+    AnalysisSection == "Staffing rules",
+    SourceModel == "Current",
+    SourceComponent %in% outside_formula_current_components
+  )
+
+staffing_comparison_crosswalk <- comparison_crosswalk |>
+  filter(
+    AnalysisSection == "Staffing rules",
+    ComparisonGroup != "Outside formula"
+  )
+
+missing_outside_formula_crosswalk <- tibble(
+  Component = setdiff(
+    outside_formula_current_components,
+    outside_formula_crosswalk$SourceComponent
+  )
+)
+
+unexpected_outside_formula_crosswalk <- outside_formula_crosswalk |>
+  filter(
+    ComparisonGroup != "Outside formula" |
+      MappingStatus != "Confirmed" |
+      QuantityStatus != "Not required" |
+      RateStatus != "Not applicable" |
+      IncludeInPreliminary |
+      IncludeInFinal
+  )
+
+missing_outside_formula_documentation <- tibble(
+  Component = setdiff(
+    outside_formula_current_components,
+    unique(outside_formula_detail$Component)
+  )
+)
+
+outside_formula_in_core_detail <- bind_rows(
+  current_detail |>
+    filter(Component %in% outside_formula_current_components) |>
+    transmute(Model = "Current", DistrictCode, Component),
+  proposed_detail |>
+    filter(Component %in% outside_formula_current_components) |>
+    transmute(Model = "Proposed", DistrictCode, Component)
+)
+
+stop_if_rows(
+  missing_outside_formula_crosswalk,
+  "An outside-formula current component is missing from the comparison crosswalk."
+)
+
+stop_if_rows(
+  unexpected_outside_formula_crosswalk,
+  paste(
+    "An outside-formula crosswalk row is not classified as confirmed,",
+    "not required, not applicable, and excluded from both comparison totals."
+  )
+)
+
+stop_if_rows(
+  missing_outside_formula_documentation,
+  "An outside-formula current component is missing from the Step 04 audit output."
+)
+
+stop_if_rows(
+  outside_formula_in_core_detail,
+  paste(
+    "An outside-formula component entered the core position-based funding detail.",
+    "It must remain only in 04_current_outside_formula_components.csv."
+  )
+)
+
 scope_leas <- proposed_detail |>
   distinct(DistrictCode, DistrictName, LEAType) |>
   arrange(DistrictCode)
@@ -87,13 +191,11 @@ scope_leas <- proposed_detail |>
 
 # A. STAFFING-RULE COMPARISON ---------------------------------------------------
 
-# Keep every staffing crosswalk row. IncludeInPreliminary controls the working
-# total; it no longer controls whether a row appears in the comparison output.
-current_staffing_map <- comparison_crosswalk |>
-  filter(
-    AnalysisSection == "Staffing rules",
-    SourceModel == "Current"
-  ) |>
+# Keep every formula-comparison crosswalk row. Outside-formula rows remain in
+# the maintained crosswalk and Step 04 audit output but do not enter this table.
+# IncludeInPreliminary controls the working total for modeled categories.
+current_staffing_map <- staffing_comparison_crosswalk |>
+  filter(SourceModel == "Current") |>
   select(
     SourceComponent,
     ComparisonCategory,
@@ -108,11 +210,8 @@ current_staffing_map <- comparison_crosswalk |>
     Notes
   )
 
-proposed_staffing_map <- comparison_crosswalk |>
-  filter(
-    AnalysisSection == "Staffing rules",
-    SourceModel == "Proposed"
-  ) |>
+proposed_staffing_map <- staffing_comparison_crosswalk |>
+  filter(SourceModel == "Proposed") |>
   select(
     SourceComponent,
     ComparisonCategory,
@@ -383,12 +482,11 @@ staffing_component_comparison <- full_join(
       IncludedInWorkingTotal ~ "Provisional",
       TRUE ~ "Not yet estimable"
     ),
-    OutstandingQuestion = str_squish(paste(
+    OutstandingQuestion = collapse_nonblank_pair(
       CurrentOutstandingQuestion,
-      ProposedOutstandingQuestion,
-      sep = " | "
-    )),
-    Notes = str_squish(paste(CurrentNotes, ProposedNotes, sep = " | "))
+      ProposedOutstandingQuestion
+    ),
+    Notes = collapse_nonblank_pair(CurrentNotes, ProposedNotes)
   ) |>
   arrange(DisplayOrder, ComparisonCategory) |>
   select(
@@ -922,8 +1020,8 @@ unmapped_current_staffing <- current_detail |>
   )) |>
   distinct(Component) |>
   anti_join(
-    comparison_crosswalk |>
-      filter(AnalysisSection == "Staffing rules", SourceModel == "Current") |>
+    staffing_comparison_crosswalk |>
+      filter(SourceModel == "Current") |>
       distinct(Component = SourceComponent),
     by = "Component"
   )
@@ -935,8 +1033,8 @@ unmapped_proposed_staffing <- proposed_detail |>
   )) |>
   distinct(Component) |>
   anti_join(
-    comparison_crosswalk |>
-      filter(AnalysisSection == "Staffing rules", SourceModel == "Proposed") |>
+    staffing_comparison_crosswalk |>
+      filter(SourceModel == "Proposed") |>
       distinct(Component = SourceComponent),
     by = "Component"
   )
@@ -994,6 +1092,76 @@ comparison_qc <- tibble(
         filter(FundingCategory == "Operational Funding") |>
         pull(ProposedFundingAmount) - operational_funding_pool
     ) <= comparison_tolerance
+  )
+)
+
+newly_confirmed_categories <- c(
+  "Administrative Support Professionals",
+  "Instructional Supports"
+)
+
+newly_confirmed_category_qc <- tibble(
+  ComparisonCategory = newly_confirmed_categories
+) |>
+  left_join(
+    staffing_component_comparison |>
+      select(
+        ComparisonCategory,
+        IsCompleteForFinalComparison,
+        ComparisonStatus,
+        OutstandingQuestion
+      ),
+    by = "ComparisonCategory"
+  )
+
+comparison_qc <- bind_rows(
+  comparison_qc,
+  tibble(
+    CheckType = "New guidance",
+    Check = c(
+      "Outside-formula components are absent from core funding detail",
+      "Outside-formula crosswalk rows are excluded from both comparison totals",
+      "Outside-formula components are preserved in the Step 04 audit output",
+      "Newly confirmed functional crosswalk categories enter the confirmed subtotal",
+      "Newly confirmed functional crosswalk categories have no outstanding question"
+    ),
+    Expected = c(
+      "0",
+      "0",
+      as.character(length(outside_formula_current_components)),
+      as.character(length(newly_confirmed_categories)),
+      "0"
+    ),
+    Actual = c(
+      as.character(nrow(outside_formula_in_core_detail)),
+      as.character(nrow(unexpected_outside_formula_crosswalk)),
+      as.character(
+        sum(
+          outside_formula_current_components %in%
+            unique(outside_formula_detail$Component)
+        )
+      ),
+      as.character(sum(
+        newly_confirmed_category_qc$IsCompleteForFinalComparison %in% TRUE
+      )),
+      as.character(sum(
+        is.na(newly_confirmed_category_qc$OutstandingQuestion) |
+          newly_confirmed_category_qc$OutstandingQuestion != ""
+      ))
+    ),
+    Pass = c(
+      nrow(outside_formula_in_core_detail) == 0,
+      nrow(unexpected_outside_formula_crosswalk) == 0,
+      all(
+        outside_formula_current_components %in%
+          unique(outside_formula_detail$Component)
+      ),
+      all(newly_confirmed_category_qc$IsCompleteForFinalComparison %in% TRUE),
+      all(
+        !is.na(newly_confirmed_category_qc$OutstandingQuestion) &
+          newly_confirmed_category_qc$OutstandingQuestion == ""
+      )
+    )
   )
 )
 

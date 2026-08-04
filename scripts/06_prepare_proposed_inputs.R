@@ -791,6 +791,9 @@ charter_school_units <- charter_allocation_long |>
     CharterBuildingPolicy = charter_building_policy
   )
 
+# DAFB remains in the source-level noncharter input only for workbook and
+# source-data audit. IncludeInStatewide is FALSE, so it is excluded from every
+# aligned IV&V calculation and statewide total.
 noncharter_school_units <- school_input |>
   filter(LEAType != "Charter") |>
   transmute(
@@ -1069,16 +1072,16 @@ proposed_input_qc <- tibble(
   Check = c(
     "Charter LEAs",
     "Charter calculator buildings",
-    "District and DAFB school-code calculation units",
-    "Total proposed school calculation units excluding DAFB",
-    "Total proposed school calculation units including DAFB",
+    "Noncharter source calculation units (includes DAFB audit rows)",
+    "Aligned proposed school calculation units (DAFB excluded)",
+    "Source-audit proposed school calculation units (includes DAFB)",
     "Charter categories adjusted to shared totals",
     "Charter student categories using largest remainder",
     "Adjusted charter student categories resolved by largest remainder",
     "Charter categories using enrollment fallback",
     "Charter categories using manual shares",
-    "Raw operational enrollment excluding DAFB",
-    "Raw operational enrollment including DAFB",
+    "Aligned operational enrollment (DAFB excluded)",
+    "Source-audit operational enrollment (includes DAFB)",
     "Operational enrollment basis"
   ),
   Value = c(
