@@ -10,8 +10,9 @@
 # The script validates the workbook against the statewide comparable subtotal
 # but keeps technical reconciliation checks out of the presentation workbook.
 #
-# LATEST REVISION: starts from the simplified workbook and adds only the
-# Instructional Supports detail tab requested for the consolidated category.
+# LATEST REVISION: preserves incomplete Food Services Supervisor current values
+# and differences as blanks in Category Detail, adds an LEA Summary interpretation
+# note, and uses share-ready column headings aligned with the IV&V report.
 #
 # Run from the school_funding_model project root after the main pipeline.
 # =============================================================================
@@ -624,15 +625,42 @@ category_detail <- lea_category |>
     `LEA Name` = DistrictName,
     `LEA Type` = as.character(LEAType),
     `Category` = ComparisonCategory,
-    `Known Current Positions` = CurrentPositions,
+    # Presentation only: do not imply known current values or differences where
+    # Food Services Supervisor current quantities remain incomplete.
+    `Current Positions` = if_else(
+      ComparisonCategory == "Food Services Supervisor" &
+        CurrentAmountComplete == "No",
+      NA_real_,
+      CurrentPositions
+    ),
     `Proposed Positions` = ProposedPositions,
-    `Position Difference` = PositionDifference,
-    `Known Current Funding` = CurrentFunding,
+    `Position Difference` = if_else(
+      ComparisonCategory == "Food Services Supervisor" &
+        CurrentAmountComplete == "No",
+      NA_real_,
+      PositionDifference
+    ),
+    `Current Funding` = if_else(
+      ComparisonCategory == "Food Services Supervisor" &
+        CurrentAmountComplete == "No",
+      NA_real_,
+      CurrentFunding
+    ),
     `Proposed Funding` = ProposedFunding,
-    `Funding Difference` = FundingDifference,
-    `Current Amount Complete` = CurrentAmountComplete,
+    `Funding Difference` = if_else(
+      ComparisonCategory == "Food Services Supervisor" &
+        CurrentAmountComplete == "No",
+      NA_real_,
+      FundingDifference
+    ),
+    `Current Funding Complete` = CurrentAmountComplete,
     `Category Status` = ComparisonStatus,
-    `Driver Rank Within LEA` = DriverRank
+    `Funding Difference Rank Within LEA` = if_else(
+      ComparisonCategory == "Food Services Supervisor" &
+        CurrentAmountComplete == "No",
+      NA_integer_,
+      as.integer(DriverRank)
+    )
   )
 
 # Instructional Supports detail ------------------------------------------------
@@ -875,12 +903,12 @@ lea_summary <- lea_category |>
     `LEA Code` = DistrictCode,
     `LEA Name` = DistrictName,
     `LEA Type` = as.character(LEAType),
-    `Known Current Comparable Funding` = CurrentFunding,
+    `Current Comparable Funding` = CurrentFunding,
     `Proposed Comparable Funding` = ProposedFunding,
     `Funding Difference` = FundingDifference,
     `Percent Difference` = PercentDifference,
     `Direction` = Direction,
-    `Current Amount Complete` = CurrentAmountComplete
+    `Current Funding Complete` = CurrentAmountComplete
   )
 
 # Validation -------------------------------------------------------------------
@@ -950,24 +978,70 @@ wrap_style <- openxlsx::createStyle(wrapText = TRUE, valign = "top")
 
 # LEA Summary ------------------------------------------------------------------
 
-openxlsx::writeDataTable(
+lea_summary_note <- paste(
+  "Interpretation note: Where Current Funding Complete = No, Current Comparable Funding is a known minimum based on available current data.",
+  "Funding Difference and Percent Difference are therefore provisional and are calculated against that known current amount."
+)
+
+# Keep the incomplete-current caveat visible without changing the calculation.
+openxlsx::mergeCells(
   wb,
   "LEA Summary",
-  lea_summary,
-  tableName = "LEASummary",
-  tableStyle = "TableStyleMedium2"
+  cols = 1:ncol(lea_summary),
+  rows = 1
 )
-openxlsx::freezePane(wb, "LEA Summary", firstRow = TRUE)
+openxlsx::writeData(
+  wb,
+  "LEA Summary",
+  lea_summary_note,
+  startRow = 1,
+  colNames = FALSE
+)
 openxlsx::addStyle(
   wb,
   "LEA Summary",
-  header_style,
+  openxlsx::createStyle(
+    fgFill = "#FFF2CC",
+    wrapText = TRUE,
+    valign = "center"
+  ),
   rows = 1,
   cols = 1:ncol(lea_summary),
   gridExpand = TRUE,
   stack = TRUE
 )
-openxlsx::setRowHeights(wb, "LEA Summary", rows = 1, heights = 40)
+openxlsx::setRowHeights(wb, "LEA Summary", rows = 1, heights = 42)
+
+lea_summary_start_row <- 3
+
+openxlsx::writeDataTable(
+  wb,
+  "LEA Summary",
+  lea_summary,
+  startRow = lea_summary_start_row,
+  tableName = "LEASummary",
+  tableStyle = "TableStyleMedium2"
+)
+openxlsx::freezePane(
+  wb,
+  "LEA Summary",
+  firstActiveRow = lea_summary_start_row + 1
+)
+openxlsx::addStyle(
+  wb,
+  "LEA Summary",
+  header_style,
+  rows = lea_summary_start_row,
+  cols = 1:ncol(lea_summary),
+  gridExpand = TRUE,
+  stack = TRUE
+)
+openxlsx::setRowHeights(
+  wb,
+  "LEA Summary",
+  rows = lea_summary_start_row,
+  heights = 40
+)
 openxlsx::setColWidths(
   wb,
   "LEA Summary",
@@ -975,7 +1049,9 @@ openxlsx::setColWidths(
   widths = c(11, 12, 10, 45, 12, 25, 25, 18, 17, 12, 22)
 )
 
-summary_rows <- 2:(nrow(lea_summary) + 1)
+summary_rows <- (lea_summary_start_row + 1):(
+  lea_summary_start_row + nrow(lea_summary)
+)
 openxlsx::addStyle(
   wb,
   "LEA Summary",
@@ -1032,7 +1108,7 @@ openxlsx::setColWidths(
     10, 45, 12, 36,
     20, 18, 18,
     20, 18, 18,
-    22, 18, 19
+    22, 18, 28
   )
 )
 
@@ -1326,7 +1402,7 @@ message(
 message("Instructional Supports rows: ", nrow(instructional_supports), ".")
 message(
   "Comparable totals: current $",
-  format(round(sum(lea_summary$`Known Current Comparable Funding`)), big.mark = ","),
+  format(round(sum(lea_summary$`Current Comparable Funding`)), big.mark = ","),
   "; proposed $",
   format(round(sum(lea_summary$`Proposed Comparable Funding`)), big.mark = ","),
   "."
